@@ -52,7 +52,7 @@ function App() {
       const blobUrl = URL.createObjectURL(blob);
       const downloadLink = document.createElement('a');
       downloadLink.href = blobUrl;
-      downloadLink.download = 'generated-json.json';
+      downloadLink.download = `plugin-${"figma"}.json`;
       if (progress < 50) {
         setLoadingText("Extrayendo propiedades Css");
       } else if (progress >= 50 && progress < 100) {

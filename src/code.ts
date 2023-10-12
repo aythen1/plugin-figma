@@ -1,6 +1,5 @@
-// import { settings } from "./dist/settings";
 import { fnNativeAttributes } from './components/CssProperties';
-import {processImages} from './components/ImagesProperties'
+import { getAbsolutePositionRelativeToArtboard, getImages } from './components/PropertiesHandlers';
 
 let templateComponent = {
   "tag": "span",
@@ -36,7 +35,6 @@ let templateComponent = {
         "attribute": {}
       },
       "desktop": {
-        //"cssProperties" :[], 
         "width": "1920",
         "active": true,
         "attribute":[], 
@@ -76,20 +74,26 @@ let getComponentType = (type) => {
 
 
 let id = 1
-let createComponent = async (node) => {
+let createComponent =  async (node) => {
   const componentType = getComponentType(node.type);
-  const hasChildren = node.type === 'GROUP' || node.type === 'FRAME';
+  const hasChildren = node.type === 'GROUP' || node.type === 'FRAME' || node.type === 'INSTANCE';
   const componentName = node.name;
   const cssProperties = fnNativeAttributes(node);
-  const imgProperties = await processImages(node);
+  const position = getAbsolutePositionRelativeToArtboard(node)
+  //const imgProperties = await processImages(node);
+  const imageEncode = await getImages(node)
   
   let tree = {
     ...templateComponent,
-    figmaId: id++ ,
+    figmaId: id++,
     tag: componentType,
     name: componentType,
     componentName: componentName,
-    image: imgProperties,
+    image: imageEncode,
+    nativeAttributes: {
+      value: "text",
+      innerHTML: node.characters? node.characters : ""
+    },
     Property: {
       style: {
         wide: {
@@ -113,7 +117,6 @@ let createComponent = async (node) => {
           attribute: {}
         },
         desktop: {
-          //cssProperties: cssProperties, 
           width: "1920",
           active: true,
           attribute:cssProperties,
@@ -127,8 +130,8 @@ let createComponent = async (node) => {
       grid: {
         height: node.height,
         width: node.width,
-        x: node.x,
-        y: node.y,
+        x: position.x,
+        y: position.y,
       },
       event: "",
       state: {},
@@ -136,11 +139,13 @@ let createComponent = async (node) => {
     },
     hasChildren: hasChildren,
     children: []
-  };  
+  };
   
-  
-  if ((node.type === 'RECTANGLE' || node.type === 'TEXT') && node.fills) {    
-    tree.image = imgProperties;
+    
+  if ((node.type === 'RECTANGLE' || node.type === 'TEXT') && node.fills) {
+    tree.image = imageEncode;
+    tree.tag = imageEncode?.image?.length > 3 ? "img" : componentType
+    tree.name = imageEncode?.image?.length > 3? "img" : componentType
   }
   if (hasChildren && !(componentType == 'svg')) {
     const childComponents = await Promise.all(
@@ -162,6 +167,7 @@ let createComponent = async (node) => {
       await new Promise((resolve) => setTimeout(resolve, 0)); 
     }
   }
+
   return tree;
 };
 
@@ -179,5 +185,3 @@ figma.ui.onmessage = async (msg) => {
     }
   }
 }
-
- 
