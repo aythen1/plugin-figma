@@ -22,7 +22,7 @@ function App() {
     parent.postMessage({ pluginMessage: { type: "figma-json" } }, "*");
 
     try {
-      const jsonGenerationTime = 10000;
+      const jsonGenerationTime = 3000;
       const endTime = startTime + jsonGenerationTime;
 
       while (Date.now() < endTime) {

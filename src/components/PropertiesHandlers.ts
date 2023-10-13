@@ -318,6 +318,11 @@ export function buildLetterspacing(letterSpacing) {
   if (letterSpacing.unit === 'PIXELS') return `${letterSpacing.value}px`  
 }
 
+export function buildLineheight(lineHeight) {
+  if (lineHeight.unit === 'PERCENT') return `${lineHeight.value / 100}em`
+  if (lineHeight.unit === 'PIXELS') return `${lineHeight.value}px`  
+}
+
 export function buildTextalign(textAlign) {
   if (textAlign === 'LEFT') return 'start'
   if (textAlign === 'CENTER') return 'center'
@@ -421,7 +426,7 @@ export const getMaskType  = (node) => {
 */
 export const getfillGeometry  = (node) => {
   if (node.fillGeometry.length > 0) {
-    return `path(${node.fillGeometry.data});`;
+    return `${node.fillGeometry.data}`;
   }
   return null;
 };

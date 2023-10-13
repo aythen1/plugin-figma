@@ -31,7 +31,7 @@ Una vez que el proyecto esté en funcionamiento, sigue estos pasos para cargar y
 
 2. Ve a la parte superior izquierda de la ventana y selecciona `Resources` y elige `Plugins`.
 
-3. En el menú desplegable `Recents nad saves`, elige `Development`.
+3. En el menú desplegable `Recents and saves`, elige `Development`.
 
 4. Aparecerá una opción `Create a new plugin` o `+`. Haz clic en ella.
 

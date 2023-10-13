@@ -15,7 +15,8 @@ import {
   buildTextalign,
   buildTextcase,
   buildVerticalalign,
-  buildTextdecoration
+  buildTextdecoration,
+  buildLineheight
 } from './PropertiesHandlers';
 
 const specialProperties = {
@@ -56,7 +57,7 @@ const specialProperties = {
     fontWeight: node.fontName ? buildFontStyle(node.fontName.style) : null,
   }),
   lineHeight: (node) => ({
-    lineHeight: node.lineHeight ? `${node.lineHeight.value}px` : null
+    lineHeight: node.lineHeight ? buildLineheight(node.lineHeight) : null
   }),
   letterSpacing: (node) => ({
     letterSpacing: node.letterSpacing ? buildLetterspacing(node.letterSpacing) : null
@@ -91,7 +92,7 @@ const specialProperties = {
     maskType: node.maskType ? getMaskType(node) : null
   }),
   fillGeometry: (node) => ({
-    clipPath: node.fillGeometry ? `path(${node.fillGeometry[0].data})` : null
+     clipPath: node.fillGeometry ? node.fillGeometry[0].data : null
   }),
 };
 
