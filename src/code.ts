@@ -4,6 +4,7 @@ import { getAbsolutePositionRelativeToArtboard, getImages } from './components/P
 let templateComponent = {
   "tag": "span",
   "name": "span",
+  "tagName": "" ,
   "attributes": {},
   "image":[],
   "nativeAttributes": {
@@ -54,8 +55,7 @@ let templateComponent = {
     "event": "",
     "state": {},
     "other": {}
-  },
-  "componentName": "" ,
+  }
 };
 
 let getComponentType = (type) => {
@@ -76,7 +76,7 @@ let getComponentType = (type) => {
 let id = 1
 let createComponent =  async (node) => {
   const componentType = getComponentType(node.type);
-  const hasChildren = node.type === 'GROUP' || node.type === 'FRAME' || node.type === 'INSTANCE';
+  const hasChildren = node.type === 'GROUP' || node.type === 'FRAME' || node.type === 'INSTANCE' || node.type === 'COMPONENT';
   const componentName = node.name;
   const cssProperties = fnNativeAttributes(node);
   const position = getAbsolutePositionRelativeToArtboard(node)
@@ -88,7 +88,7 @@ let createComponent =  async (node) => {
     figmaId: id++,
     tag: componentType,
     name: componentType,
-    componentName: componentName,
+    tagName: componentName,
     image: imageEncode,
     nativeAttributes: {
       value: "text",

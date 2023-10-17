@@ -124,23 +124,23 @@ export const getCounterAxisAlignItems = (node) => {
  * @returns color | null
  */ 
 export function getBackgroundColor(node) {
-   if (node.type !== 'TEXT' && node.fills && node.fills.length > 0) {
+   if (node.type !== 'TEXT' && node.type === "RECTANGLE" || node.type === "FRAME" && node.fills.length > 0) {
     const fill = node.fills[0];
     if (fill && fill.type === 'SOLID') {        
       return transformBackground(fill.color)
     }
   }
-  return null;
+  return "transparent";
 }
   
 export function getTextColor(node) {
-  if (node.type === 'TEXT' && node.fills.length > 0) {
+  if (node.type === 'TEXT' || node.type === "VECTOR" || node.type === "STAR" || node.type === "ELLIPSE" && node.fills.length > 0) {
     const textFill = node.fills[0];
     if (textFill.type === 'SOLID' && textFill.color) {
       return transformBackground(textFill.color);
     }
   }
-  return null;
+  return "transparent";
 }
 
 export async function getImages(node) {
@@ -424,10 +424,13 @@ export const getMaskType  = (node) => {
               ],
  * Ejemplo clip-path: path('M 0 200 L 0,75 A 5,5 0,0,1 150,75 L 200 200 z');
 */
-export const getfillGeometry  = (node) => {
-  if (node.fillGeometry.length > 0) {
-    return `${node.fillGeometry.data}`;
-  }
+export const getfillGeometry = (node) => {
+  if ( node.type === "ELLIPSE" && node.fillGeometry[0].length > 0) {
+    return node.fillGeometry[0].data;
+  } 
+  // if (node.type !== "VECTOR" && node.type == "RECTANGLE" && node.fillGeometry.length > 0) {
+  //   return `${node.fillGeometry.data}`;
+  // }
   return null;
 };
 

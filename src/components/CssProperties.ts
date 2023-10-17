@@ -16,7 +16,8 @@ import {
   buildTextcase,
   buildVerticalalign,
   buildTextdecoration,
-  buildLineheight
+  buildLineheight,
+  getfillGeometry
 } from './PropertiesHandlers';
 
 const specialProperties = {
@@ -91,8 +92,11 @@ const specialProperties = {
   maskType: (node) => ({
     maskType: node.maskType ? getMaskType(node) : null
   }),
+  strokeWeight: (node) => ({
+    strokeWidth: node.strokeWeight ? node.strokeWeight : null
+  }),
   fillGeometry: (node) => ({
-     clipPath: node.fillGeometry ? node.fillGeometry[0].data : null
+      clipPath: node.fillGeometry ? node.fillGeometry[0].data : null
   }),
 };
 
