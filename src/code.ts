@@ -1,5 +1,5 @@
 import { fnNativeAttributes } from './components/CssProperties';
-import { getAbsolutePositionRelativeToArtboard, getImages } from './components/PropertiesHandlers';
+import { getAbsolutePositionRelativeToArtboard, getImages, changeVisibility } from './components/PropertiesHandlers';
 
 let templateComponent = {
   "tag": "span",
@@ -80,7 +80,6 @@ let createComponent =  async (node) => {
   const componentName = node.name;
   const cssProperties = fnNativeAttributes(node);
   const position = getAbsolutePositionRelativeToArtboard(node)
-  //const imgProperties = await processImages(node);
   const imageEncode = await getImages(node)
   
   let tree = {
@@ -145,7 +144,7 @@ let createComponent =  async (node) => {
   if ((node.type === 'RECTANGLE' || node.type === 'TEXT') && node.fills) {
     tree.image = imageEncode;
     tree.tag = imageEncode?.image?.length > 3 ? "img" : componentType
-    tree.name = imageEncode?.image?.length > 3? "img" : componentType
+    tree.name = imageEncode?.image?.length > 3 ? "img" : componentType
   }
   if (hasChildren && !(componentType == 'svg')) {
     const childComponents = await Promise.all(
@@ -167,7 +166,6 @@ let createComponent =  async (node) => {
       await new Promise((resolve) => setTimeout(resolve, 0)); 
     }
   }
-
   return tree;
 };
 
@@ -178,7 +176,9 @@ figma.ui.onmessage = async (msg) => {
     try {
       const selectedComponent = figma.currentPage.selection[0];
       const jsonTree = await createComponent(selectedComponent);
+      changeVisibility(jsonTree)
       const jsonText = JSON.stringify(jsonTree, null, 2);
+      
       figma.ui.postMessage({ type: "json-data", data: jsonText });
     } catch (error) {
       console.error('Error al generar el JSON:', error);

@@ -22,7 +22,7 @@ function App() {
     parent.postMessage({ pluginMessage: { type: "figma-json" } }, "*");
 
     try {
-      const jsonGenerationTime = 3000;
+      const jsonGenerationTime = 4500;
       const endTime = startTime + jsonGenerationTime;
 
       while (Date.now() < endTime) {
@@ -75,7 +75,7 @@ function App() {
     const messageListener = (event: MessageEvent) => {
       if (event.data && event.data.pluginMessage.type === "json-data" && !downloadRequested) {
         const receivedJsonData = event.data.pluginMessage.data;
-        console.log("Esta es la data del JSON:", receivedJsonData);
+        // console.log("Esta es la data del JSON:", receivedJsonData);
         setJsonData(receivedJsonData);
       }
     };

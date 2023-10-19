@@ -34,6 +34,67 @@ export const getAbsolutePositionRelativeToArtboard = (node) => {
   export const isGroupNode = (node: unknown): node is GroupNode =>
     !!(node && (node as any).type === "GROUP");
   
+
+export const getDisplay = (node) => {
+  if (!node.layoutGrids) return "flex"
+  if (node.layoutGrids && node.layoutGrids[0].length > 0) return "grid"
+}
+
+// export const getVisibility = (node) => {
+//   if (node.parent && node.parent.visible === false) {
+//     return "hidden"    
+//   }
+//   if (node.visible === false) {
+//     node.isShow = false;
+//     return "hidden"
+//   }
+//   return "visible"
+// }
+
+export const getVisibility = (node) => {
+  if (node.visible === false) {
+    node.isShow = false;
+    return "hidden";
+  }
+  if (node.parent) {
+    return getVisibility(node.parent);
+  }
+  return "visible";
+}
+
+export const changeVisibility = (node) => {
+  // Si el nodo no es visible, establece todos sus hijos como no visibles y 'isShow' en false
+  if (node.Property?.style?.desktop?.attribute?.visible === false && node.hasChildren) {
+    node.isShow = false;
+    node.children.forEach(child => {
+      child.Property.style.desktop.attribute.visible = false;
+      child.isShow = false;
+      changeVisibility(child);
+    });
+  } else if (node.hasChildren) {
+    // Si el nodo es visible, recorre sus hijos
+    node.children.forEach(changeVisibility);
+  }
+}
+
+// export const changeVisibility = (node) => {
+//   if (node.Property?.style?.desktop?.attribute?.visible === false || null) {
+//     node.isShow = false;
+//     node.Property.style.desktop.attribute.visible = "hidden"
+//     if (Array.isArray(node.children)) {
+//       node.children.forEach(child => {
+//         child.isShow = false;
+//         changeVisibility(child);
+//       });
+//     }
+//   } else {
+//     if (Array.isArray(node.children)) {
+//       node.children.forEach(changeVisibility);
+//     }
+//   }
+// }
+
+
 /**
   * LAYOUT
   * @param node 
@@ -123,7 +184,7 @@ export const getCounterAxisAlignItems = (node) => {
  * @param node 
  * @returns color | null
  */ 
-export function getBackgroundColor(node) {
+export const getBackgroundColor = (node) => {
    if (node.type !== 'TEXT' && node.type === "RECTANGLE" || node.type === "FRAME" && node.fills.length > 0) {
     const fill = node.fills[0];
     if (fill && fill.type === 'SOLID') {        
@@ -133,7 +194,7 @@ export function getBackgroundColor(node) {
   return "transparent";
 }
   
-export function getTextColor(node) {
+export const getTextColor = (node) => {
   if (node.type === 'TEXT' || node.type === "VECTOR" || node.type === "STAR" || node.type === "ELLIPSE" && node.fills.length > 0) {
     const textFill = node.fills[0];
     if (textFill.type === 'SOLID' && textFill.color) {
@@ -160,7 +221,7 @@ export async function getImages(node) {
 }
 
 
-function rgbToHex(int) {
+const rgbToHex= (int) => {
   var hex = Number(Math.round(255 * int)).toString(16);
   if (hex.length < 2) {
     hex = "0" + hex;
@@ -168,14 +229,14 @@ function rgbToHex(int) {
   return hex;
 }
 
-function makeHex(r, g, b) {
+const makeHex = (r, g, b) => {
   let red = rgbToHex(r);
   let green = rgbToHex(g);
   let blue = rgbToHex(b);
   return '#' + red + green + blue;
 }
 
-function getTx(deg) {
+const getTx = (deg) => {
   if (deg >= 120) {
     if (deg >= 180) {
       return 1;
@@ -241,7 +302,7 @@ function getTx(deg) {
               }
             ], 
  */
-function figmaTransformToCSSAngle(figmaTransform) {
+const figmaTransformToCSSAngle = (figmaTransform) => {
     // Extraer los valores de la matriz de transformación
     let a = figmaTransform[0][0];
     let b = figmaTransform[0][1];
@@ -260,19 +321,19 @@ function figmaTransformToCSSAngle(figmaTransform) {
     return angleInDegrees;
 }
 
-function convertToDegrees(matrix) {
+const convertToDegrees = (matrix) => {
   const a = matrix[0][0];
   const b = matrix[1][1];
   const angle = Math.round(Math.atan2(b, a) * (180 / Math.PI));
   return angle < 0 ? angle + 360 : angle;
 }
 
-function getDegreesForMatrix(matrix) {
+const getDegreesForMatrix = (matrix) => {
   const degrees = figmaTransformToCSSAngle(matrix) || 0;
   return `${degrees}deg`;
 }
 
-export function convertFigmaGradientToString(node) {
+export const convertFigmaGradientToString = (node) => {
  const paint = node.fills.find(item => item.type === 'GRADIENT_LINEAR' || item.type === 'GRADIENT_ANGULAR' || item.type === 'GRADIENT_RADIAL' || item.type === 'GRADIENT_DIAMOND' );
   if(!paint || paint === "undefined") return null
   
@@ -300,7 +361,7 @@ export function convertFigmaGradientToString(node) {
  * @param style
  * @returns Number
 */
-export function buildFontStyle(style) {
+export const buildFontStyle = (style) => {
   if (style === 'Thin') return 100
   else if (style === 'ExtraLight') return 200
   else if (style === 'Light') return 300
@@ -313,35 +374,35 @@ export function buildFontStyle(style) {
   else return style
 }
 
-export function buildLetterspacing(letterSpacing) {
+export const buildLetterspacing = (letterSpacing) => {
   if (letterSpacing.unit === 'PERCENT') return `${letterSpacing.value / 100}em`
   if (letterSpacing.unit === 'PIXELS') return `${letterSpacing.value}px`  
 }
 
-export function buildLineheight(lineHeight) {
+export const buildLineheight = (lineHeight) => {
   if (lineHeight.unit === 'PERCENT') return `${lineHeight.value / 100}em`
   if (lineHeight.unit === 'PIXELS') return `${lineHeight.value}px`  
 }
 
-export function buildTextalign(textAlign) {
+export const buildTextalign = (textAlign) => {
   if (textAlign === 'LEFT') return 'start'
   if (textAlign === 'CENTER') return 'center'
   if (textAlign === 'RIGHT') return 'end'
 }
 
-export function buildVerticalalign(verticalAlign) {
+export const buildVerticalalign = (verticalAlign) => {
   if (verticalAlign === 'TOP') return 'top'
   if (verticalAlign === 'CENTER') return 'middle'
   if (verticalAlign === 'BOTTOM') return 'bottom'
 }
 
-export function buildTextdecoration(textDecoration) {
+export const buildTextdecoration = (textDecoration) => {
   if (textDecoration === 'UNDERLINE') return 'underline'
   if (textDecoration === 'STRIKETHROUGH') return 'line-through'
   if (textDecoration === 'NONE') return 'none'
 }
 
-export function buildTextcase(textCase) {
+export const buildTextcase = (textCase) => {
   if (textCase === 'ORIGINAL') return 'none'
   if (textCase === 'UPPER') return 'uppercase'
   if (textCase === 'LOWER') return 'lowercase'
@@ -357,7 +418,7 @@ export function buildTextcase(textCase) {
    * filter: blur(2px); <-- LAYER_BLUR
    * backdrop-filter: blur(2px); <-- BACKGROUND_BLUR
   */ 
-export function buildEffects(effects) {
+export const buildEffects = (effects) => {
   const { type, offset, radius, spread, color } = effects
   if(!effects || Object.keys(effects).length == 0 || !type) return null
   if (type === 'DROP_SHADOW') {
@@ -379,7 +440,7 @@ export function buildEffects(effects) {
  * Border
  * border: 1px solid #000;
  */  
-export function buildStrokes(strokeWeight, strokes ) {
+export const buildStrokes = (strokeWeight, strokes ) => {
   const { type, color, opacity } = strokes
   const colors = makeHex(color.r, color.g, color.b) 
   if(!type) return null
@@ -387,13 +448,6 @@ export function buildStrokes(strokeWeight, strokes ) {
     return `${strokeWeight}px solid ${colors}`    
   }
 }
-
-/**
- * Transform --> ROTATION
- * transform: rotate()
- * Ejemplo: transform: rotate(45deg);
- */
-
 
 /**
  * maskType --> mask-type

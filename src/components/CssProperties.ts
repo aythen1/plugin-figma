@@ -17,10 +17,18 @@ import {
   buildVerticalalign,
   buildTextdecoration,
   buildLineheight,
-  getfillGeometry
+  getfillGeometry,
+  getDisplay,
+  getVisibility
 } from './PropertiesHandlers';
 
 const specialProperties = {
+  layoutGrids: (node) => ({
+    display: getDisplay(node)
+  }),
+  // visible: (node) => ({
+  //    visibility: node.visible ? getVisibility(node) : null
+  // }),
   layoutMode: (node) => ({
     flexDirection: getLayoutMode(node)
   }),
@@ -96,7 +104,7 @@ const specialProperties = {
     strokeWidth: node.strokeWeight ? node.strokeWeight : null
   }),
   fillGeometry: (node) => ({
-      clipPath: node.fillGeometry ? node.fillGeometry[0].data : null
+      clipPath: node.fillGeometry[0]?.data ? node.fillGeometry[0].data : null
   }),
 };
 
