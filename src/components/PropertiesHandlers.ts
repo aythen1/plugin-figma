@@ -40,17 +40,6 @@ export const getDisplay = (node) => {
   if (node.layoutGrids && node.layoutGrids[0].length > 0) return "grid"
 }
 
-// export const getVisibility = (node) => {
-//   if (node.parent && node.parent.visible === false) {
-//     return "hidden"    
-//   }
-//   if (node.visible === false) {
-//     node.isShow = false;
-//     return "hidden"
-//   }
-//   return "visible"
-// }
-
 export const getVisibility = (node) => {
   if (node.visible === false) {
     node.isShow = false;
@@ -76,24 +65,6 @@ export const changeVisibility = (node) => {
     node.children.forEach(changeVisibility);
   }
 }
-
-// export const changeVisibility = (node) => {
-//   if (node.Property?.style?.desktop?.attribute?.visible === false || null) {
-//     node.isShow = false;
-//     node.Property.style.desktop.attribute.visible = "hidden"
-//     if (Array.isArray(node.children)) {
-//       node.children.forEach(child => {
-//         child.isShow = false;
-//         changeVisibility(child);
-//       });
-//     }
-//   } else {
-//     if (Array.isArray(node.children)) {
-//       node.children.forEach(changeVisibility);
-//     }
-//   }
-// }
-
 
 /**
   * LAYOUT
@@ -311,13 +282,13 @@ const figmaTransformToCSSAngle = (figmaTransform) => {
     let angleInRadians = Math.atan2(b, a);
 
     // Convertir el ángulo a grados
-    let angleInDegrees = Math.round(angleInRadians * (180 / Math.PI));
+  let angleInDegrees = Math.round(angleInRadians * (180 / Math.PI));
+   angleInDegrees = angleInDegrees + 89
 
     // Asegurarse de que el ángulo esté entre 0 y 360 grados
     if (angleInDegrees < 0) {
         angleInDegrees += 360;
     }
-
     return angleInDegrees;
 }
 
@@ -329,7 +300,7 @@ const convertToDegrees = (matrix) => {
 }
 
 const getDegreesForMatrix = (matrix) => {
-  const degrees = figmaTransformToCSSAngle(matrix) || 0;
+  let degrees = figmaTransformToCSSAngle(matrix) || 0; 
   return `${degrees}deg`;
 }
 
@@ -350,9 +321,46 @@ export const convertFigmaGradientToString = (node) => {
     return `radial-gradient(${gradientStopsString})`
   } else if (paint.type === 'GRADIENT_ANGULAR') {
     return `conic-gradient(from ${gradientTransformString}, ${gradientStopsString})`
-
   } else if (paint.type === 'GRADIENT_DIAMOND') {
     return `conic-gradient(from ${gradientTransformString}, ${gradientStopsString})`// OJO ESTE
+  }
+}
+
+export const degreesFills = (node) => {
+  const paint = node.fills.find(item => item.type === 'GRADIENT_LINEAR' || item.type === 'GRADIENT_ANGULAR' || item.type === 'GRADIENT_RADIAL' || item.type === 'GRADIENT_DIAMOND' );
+  if (!paint || paint === "undefined") return null
+  const { gradientTransform, gradientStops } = paint;
+  const gradientStopsString = gradientStops
+    .map((stop) => {
+      return `#${rgbToHex(stop.color.r)}${rgbToHex(stop.color.g)}${rgbToHex(stop.color.b)} ${Math.round(stop.position * 100 * 100) / 100}%`
+    })
+    .join(', ');
+  const gradientTransformString = getDegreesForMatrix(gradientTransform);
+  let css = '';
+  for (let fill of node) {
+    if (fill.type === 'SOLID') {
+      let r = Math.round(fill.color.r * 255);
+      let g = Math.round(fill.color.g * 255);
+      let b = Math.round(fill.color.b * 255);
+      let a = fill.opacity;
+      css += `background-color: rgba(${r}, ${g}, ${b}, ${a});\n`;
+    } else if (fill.type === 'GRADIENT_LINEAR') {
+      let gradientStops = fill.gradientStops.map(stop => {
+        let r = Math.round(stop.color.r * 255);
+        let g = Math.round(stop.color.g * 255);
+        let b = Math.round(stop.color.b * 255);
+        let a = stop.color.a;
+        return `rgba(${r}, ${g}, ${b}, ${a}) ${stop.position * 100}%`;
+      });
+      // Assume the first value of gradientTransform is the rotation in radians
+      let angle = Math.round(Math.atan2(fill.gradientTransform[0][1], fill.gradientTransform[0][0]) * (359 / Math.PI));
+      css += `background: linear-gradient(${angle}deg, ${gradientStops.join(', ')});\n`;
+    } else if (fill.type === 'GRADIENT_RADIAL') {
+      css += `radial-gradient(${gradientStopsString})`
+    } else if (paint.type === 'GRADIENT_ANGULAR') {
+      css += `conic-gradient(from ${gradientTransformString}, ${gradientStopsString})`
+    }
+    return css;
   }
 }
 
@@ -440,12 +448,48 @@ export const buildEffects = (effects) => {
  * Border
  * border: 1px solid #000;
  */  
-export const buildStrokes = (strokeWeight, strokes ) => {
+export const buildStrokes = ( strokes ) => {
   const { type, color, opacity } = strokes
-  const colors = makeHex(color.r, color.g, color.b) 
   if(!type) return null
+  const colors = makeHex(color.r, color.g, color.b) 
   if (type === 'SOLID') {
-    return `${strokeWeight}px solid ${colors}`    
+    return colors
+  }
+}
+
+export const buildStrokestop = ( node ) => {
+  const { type, color, opacity } = node.strokes[0]
+  if(!type) return null
+  const colors = makeHex(color.r, color.g, color.b) 
+  if (type === 'SOLID') {
+    return `${node.strokeTopWeight}px solid ${colors}`
+  }
+}
+
+export const buildStrokesbottom = ( node ) => {
+  const { type, color, opacity } = node.strokes[0]
+  if(!type) return null
+  const colors = makeHex(color.r, color.g, color.b) 
+  if (type === 'SOLID') {
+    return `${node.strokeBottomWeight}px solid ${colors}`
+  }
+}
+
+export const buildStrokesleft = ( node ) => {
+  const { type, color, opacity } = node.strokes[0]
+  if(!type) return null
+  const colors = makeHex(color.r, color.g, color.b) 
+  if (type === 'SOLID') {
+    return `${node.strokeLeftWeight}px solid ${colors}`
+  }
+}
+
+export const buildStrokesright = ( node ) => {
+  const { type, color, opacity } = node.strokes[0]
+  if(!type) return null
+  const colors = makeHex(color.r, color.g, color.b) 
+  if (type === 'SOLID') {
+    return `${node.strokeRightWeight}px solid ${colors}`
   }
 }
 

@@ -19,16 +19,16 @@ import {
   buildLineheight,
   getfillGeometry,
   getDisplay,
-  getVisibility
+  buildStrokesleft,
+  buildStrokesbottom,
+  buildStrokesright,
+  buildStrokestop
 } from './PropertiesHandlers';
 
 const specialProperties = {
   layoutGrids: (node) => ({
     display: getDisplay(node)
-  }),
-  // visible: (node) => ({
-  //    visibility: node.visible ? getVisibility(node) : null
-  // }),
+  }), 
   layoutMode: (node) => ({
     flexDirection: getLayoutMode(node)
   }),
@@ -48,12 +48,27 @@ const specialProperties = {
     gap: node.itemSpacing? `${node.itemSpacing}px` : null
   }),
   fills: (node) => ({
+    background: convertFigmaGradientToString(node),
     color: getTextColor(node),
-    backgroundColor: getBackgroundColor(node),
-    background: convertFigmaGradientToString(node)
+    backgroundColor: getBackgroundColor(node)
+  }),
+  strokeTopWeight: (node) => ({
+    borderTop: node.strokeTopWeight ? buildStrokestop(node) : null
+  }),
+  strokeBottomWeight: (node) => ({
+    borderBottom: node.strokeBottomWeight ? buildStrokesbottom(node) : null
+  }),
+  strokeRightWeight: (node) => ({
+    borderRight: node.strokeRightWeight ? buildStrokesright(node) : null
+  }),
+  strokeLeftWeight: (node) => ({
+    borderLeft: node.strokeLeftWeight ? buildStrokesleft(node) : null
   }),
   strokes: (node) => ({
-    border: !node.strokes || Object.keys(node.strokes).length == 0 ? null : node.strokes[0] ? buildStrokes(node.strokeWeight, node.strokes[0]) : null
+    borderColor: !node.strokes || Object.keys(node.strokes).length == 0 ? null : node.strokes[0] ? buildStrokes(node.strokes[0]) : null
+  }),
+  strokeWeight: (node) => ({
+    borderWidth: node.strokeWeight ? `${node.strokeWeight}px` : null
   }),
   cornerRadius: (node) => ({
     borderRadius: `${node.topLeftRadius ? node.topLeftRadius : 0}px ${node.topRightRadius ? node.topRightRadius : 0}px ${node.bottomRightRadius ? node.bottomRightRadius : 0}px ${node.bottomLeftRadius ? node.bottomLeftRadius : 0}px`,
@@ -100,11 +115,8 @@ const specialProperties = {
   maskType: (node) => ({
     maskType: node.maskType ? getMaskType(node) : null
   }),
-  strokeWeight: (node) => ({
-    strokeWidth: node.strokeWeight ? node.strokeWeight : null
-  }),
   fillGeometry: (node) => ({
-      clipPath: node.fillGeometry[0]?.data ? node.fillGeometry[0].data : null
+    clipPath: node.fillGeometry[0]?.data ? node.fillGeometry[0].data : null
   }),
 };
 
