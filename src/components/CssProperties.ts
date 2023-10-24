@@ -22,7 +22,7 @@ import {
   buildStrokesleft,
   buildStrokesbottom,
   buildStrokesright,
-  buildStrokestop
+  buildStrokestop,
 } from './PropertiesHandlers';
 
 const specialProperties = {

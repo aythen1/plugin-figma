@@ -31,7 +31,7 @@ export const getAbsolutePositionRelativeToArtboard = (node) => {
   return position;
   };
 
-  export const isGroupNode = (node: unknown): node is GroupNode =>
+export const isGroupNode = (node: unknown): node is GroupNode =>
     !!(node && (node as any).type === "GROUP");
   
 
@@ -137,29 +137,21 @@ export const getCounterAxisAlignItems = (node) => {
 
 /**
  * COLOR
- * @param obj 
- * @returns rgb( 0 0 255 )
- */
- export const transformBackground = (obj) => {
-  const newObj = Object.values(obj)
-  
-  let rgb = 'rgb('
-  newObj.forEach((o:number) => {
-    rgb = rgb + (o * 255).toString() + ' '
-  })  
-  rgb = rgb +')'
-  return rgb
-}
-/**
- * COLOR
  * @param node 
  * @returns color | null
  */ 
 export const getBackgroundColor = (node) => {
    if (node.type !== 'TEXT' && node.type === "RECTANGLE" || node.type === "FRAME" && node.fills.length > 0) {
     const fill = node.fills[0];
-    if (fill && fill.type === 'SOLID') {        
-      return transformBackground(fill.color)
+     if (fill && fill.type === 'SOLID') {
+       const { r, g, b } = fill.color;
+       const { opacity } = fill;
+       const cssColor = {
+         r: (r * 255).toString(),
+         g: (g * 255).toString(),
+         b: (b * 255).toString()
+       };   
+    return `rgba(${cssColor.r}, ${cssColor.g}, ${cssColor.b}, ${opacity})`;
     }
   }
   return "transparent";
@@ -169,7 +161,14 @@ export const getTextColor = (node) => {
   if (node.type === 'TEXT' || node.type === "VECTOR" || node.type === "STAR" || node.type === "ELLIPSE" && node.fills.length > 0) {
     const textFill = node.fills[0];
     if (textFill.type === 'SOLID' && textFill.color) {
-      return transformBackground(textFill.color);
+      const { r, g, b } = textFill.color;
+       const { opacity } = textFill;
+       const cssColor = {
+         r: (r * 255).toString(),
+         g: (g * 255).toString(),
+         b: (b * 255).toString()
+       };   
+    return `rgba(${cssColor.r}, ${cssColor.g}, ${cssColor.b}, ${opacity})`;
     }
   }
   return "transparent";
@@ -276,20 +275,14 @@ const getTx = (deg) => {
 const figmaTransformToCSSAngle = (figmaTransform) => {
     // Extraer los valores de la matriz de transformación
     let a = figmaTransform[0][0];
-    let b = figmaTransform[0][1];
-
-    // Calcular el ángulo en radianes
-    let angleInRadians = Math.atan2(b, a);
+    let b = figmaTransform[0][1];   
 
     // Convertir el ángulo a grados
-  let angleInDegrees = Math.round(angleInRadians * (180 / Math.PI));
+  let angleInDegrees = Math.round(Math.atan2(b, a) * (180 / Math.PI));
    angleInDegrees = angleInDegrees + 89
 
     // Asegurarse de que el ángulo esté entre 0 y 360 grados
-    if (angleInDegrees < 0) {
-        angleInDegrees += 360;
-    }
-    return angleInDegrees;
+   return angleInDegrees < 0 ? angleInDegrees + 360 : angleInDegrees;
 }
 
 const convertToDegrees = (matrix) => {
@@ -323,44 +316,6 @@ export const convertFigmaGradientToString = (node) => {
     return `conic-gradient(from ${gradientTransformString}, ${gradientStopsString})`
   } else if (paint.type === 'GRADIENT_DIAMOND') {
     return `conic-gradient(from ${gradientTransformString}, ${gradientStopsString})`// OJO ESTE
-  }
-}
-
-export const degreesFills = (node) => {
-  const paint = node.fills.find(item => item.type === 'GRADIENT_LINEAR' || item.type === 'GRADIENT_ANGULAR' || item.type === 'GRADIENT_RADIAL' || item.type === 'GRADIENT_DIAMOND' );
-  if (!paint || paint === "undefined") return null
-  const { gradientTransform, gradientStops } = paint;
-  const gradientStopsString = gradientStops
-    .map((stop) => {
-      return `#${rgbToHex(stop.color.r)}${rgbToHex(stop.color.g)}${rgbToHex(stop.color.b)} ${Math.round(stop.position * 100 * 100) / 100}%`
-    })
-    .join(', ');
-  const gradientTransformString = getDegreesForMatrix(gradientTransform);
-  let css = '';
-  for (let fill of node) {
-    if (fill.type === 'SOLID') {
-      let r = Math.round(fill.color.r * 255);
-      let g = Math.round(fill.color.g * 255);
-      let b = Math.round(fill.color.b * 255);
-      let a = fill.opacity;
-      css += `background-color: rgba(${r}, ${g}, ${b}, ${a});\n`;
-    } else if (fill.type === 'GRADIENT_LINEAR') {
-      let gradientStops = fill.gradientStops.map(stop => {
-        let r = Math.round(stop.color.r * 255);
-        let g = Math.round(stop.color.g * 255);
-        let b = Math.round(stop.color.b * 255);
-        let a = stop.color.a;
-        return `rgba(${r}, ${g}, ${b}, ${a}) ${stop.position * 100}%`;
-      });
-      // Assume the first value of gradientTransform is the rotation in radians
-      let angle = Math.round(Math.atan2(fill.gradientTransform[0][1], fill.gradientTransform[0][0]) * (359 / Math.PI));
-      css += `background: linear-gradient(${angle}deg, ${gradientStops.join(', ')});\n`;
-    } else if (fill.type === 'GRADIENT_RADIAL') {
-      css += `radial-gradient(${gradientStopsString})`
-    } else if (paint.type === 'GRADIENT_ANGULAR') {
-      css += `conic-gradient(from ${gradientTransformString}, ${gradientStopsString})`
-    }
-    return css;
   }
 }
 

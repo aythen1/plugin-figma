@@ -86,8 +86,8 @@ let createComponent =  async (node) => {
     ...templateComponent,
     figmaId: id++,
     tag: componentType,
-    name: componentType,
-    tagName: componentName,
+    name: componentName,
+    tagName: componentType,
     image: imageEncode,
     nativeAttributes: {
       value: "text",
