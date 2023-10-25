@@ -26,6 +26,9 @@ import {
 } from './PropertiesHandlers';
 
 const specialProperties = {
+  parent: () => ({
+    zIndex: 1
+  }),
   layoutGrids: (node) => ({
     display: getDisplay(node)
   }), 
@@ -99,9 +102,9 @@ const specialProperties = {
     textTransform: node.textCase ? buildTextcase(node.textCase) : null
   }),
   effects: (node) => ({
-    boxShadow: !node.effects || Object.keys(node.effects).length == 0 ? null : node.effects[0] ? buildEffects(node.effects[0]) : null,
-    filter: !node.effects || Object.keys(node.effects).length == 0 ? null : node.effects[0] ? buildEffects(node.effects[0]) : null,
-    backdropFilter: !node.effects || Object.keys(node.effects).length == 0 ? null : node.effects[0] ? buildEffects(node.effects[0]) : null,
+    boxShadow: !node.effects || Object.keys(node.effects).length == 0 ? null : node.effects[0] ? buildEffects(node) : null,
+    filter: !node.effects || Object.keys(node.effects).length == 0 ? null : node.effects[0] ? buildEffects(node) : null,
+    backdropFilter: !node.effects || Object.keys(node.effects).length == 0 ? null : node.effects[0] ? buildEffects(node) : null,
   }),
   rotation: (node) => ({
     transform: node.rotation? `rotate(${node.rotation}deg)` : null

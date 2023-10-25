@@ -1,5 +1,5 @@
 import { fnNativeAttributes } from './components/CssProperties';
-import { getAbsolutePositionRelativeToArtboard, getImages, changeVisibility } from './components/PropertiesHandlers';
+import { getAbsolutePositionRelativeToArtboard, getImages, changeVisibility, updateZIndex } from './components/PropertiesHandlers';
 
 let templateComponent = {
   "tag": "span",
@@ -77,7 +77,7 @@ let id = 1
 let createComponent =  async (node) => {
   const componentType = getComponentType(node.type);
   const hasChildren = node.type === 'GROUP' || node.type === 'FRAME' || node.type === 'INSTANCE' || node.type === 'COMPONENT';
-  const componentName = node.name;
+  const componentName = (node.name).substring(0, 15);
   const cssProperties = fnNativeAttributes(node);
   const position = getAbsolutePositionRelativeToArtboard(node)
   const imageEncode = await getImages(node)
@@ -144,7 +144,8 @@ let createComponent =  async (node) => {
   if ((node.type === 'RECTANGLE' || node.type === 'TEXT') && node.fills) {
     tree.image = imageEncode;
     tree.tag = imageEncode?.image?.length > 3 ? "img" : componentType
-    tree.name = imageEncode?.image?.length > 3 ? "img" : componentType
+    tree.tagName = imageEncode?.image?.length > 3 ? "img" : componentType
+    tree.name = imageEncode?.image?.length > 3 ? "img" : componentName
   }
   if (hasChildren && !(componentType == 'svg')) {
     const childComponents = await Promise.all(
@@ -177,6 +178,7 @@ figma.ui.onmessage = async (msg) => {
       const selectedComponent = figma.currentPage.selection[0];
       const jsonTree = await createComponent(selectedComponent);
       changeVisibility(jsonTree)
+      updateZIndex(jsonTree)
       const jsonText = JSON.stringify(jsonTree, null, 2);
       
       figma.ui.postMessage({ type: "json-data", data: jsonText });

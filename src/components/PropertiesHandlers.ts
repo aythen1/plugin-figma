@@ -1,3 +1,30 @@
+export const updateZIndex = (node, depth = 0) => {
+  if (node.Property?.style?.desktop?.attribute) {
+    node.Property.style.desktop.attribute.zIndex = depth;
+  }
+
+  if (node.hasChildren && Array.isArray(node.children)) {
+    node.children.forEach(child => updateZIndex(child, depth + 2));
+  }
+}
+
+export const changeVisibility = (node) => {
+  // Si el nodo no es visible, establece todos sus hijos como no visibles y 'isShow' en false
+  if (node.Property?.style?.desktop?.attribute?.visible === false ) {
+    node.isShow = false;
+    if (node.hasChildren) {
+      node.children.forEach(child => {
+        child.Property.style.desktop.attribute.visible = false;
+        child.isShow = false;
+        changeVisibility(child);
+      });      
+    }
+  } else if (node.hasChildren) {
+    // Si el nodo es visible, recorre sus hijos
+    node.children.forEach(changeVisibility);
+  }
+}
+
 /**
  * Positions
 */
@@ -49,21 +76,6 @@ export const getVisibility = (node) => {
     return getVisibility(node.parent);
   }
   return "visible";
-}
-
-export const changeVisibility = (node) => {
-  // Si el nodo no es visible, establece todos sus hijos como no visibles y 'isShow' en false
-  if (node.Property?.style?.desktop?.attribute?.visible === false && node.hasChildren) {
-    node.isShow = false;
-    node.children.forEach(child => {
-      child.Property.style.desktop.attribute.visible = false;
-      child.isShow = false;
-      changeVisibility(child);
-    });
-  } else if (node.hasChildren) {
-    // Si el nodo es visible, recorre sus hijos
-    node.children.forEach(changeVisibility);
-  }
 }
 
 /**
@@ -285,13 +297,6 @@ const figmaTransformToCSSAngle = (figmaTransform) => {
    return angleInDegrees < 0 ? angleInDegrees + 360 : angleInDegrees;
 }
 
-const convertToDegrees = (matrix) => {
-  const a = matrix[0][0];
-  const b = matrix[1][1];
-  const angle = Math.round(Math.atan2(b, a) * (180 / Math.PI));
-  return angle < 0 ? angle + 360 : angle;
-}
-
 const getDegreesForMatrix = (matrix) => {
   let degrees = figmaTransformToCSSAngle(matrix) || 0; 
   return `${degrees}deg`;
@@ -381,9 +386,9 @@ export const buildTextcase = (textCase) => {
    * filter: blur(2px); <-- LAYER_BLUR
    * backdrop-filter: blur(2px); <-- BACKGROUND_BLUR
   */ 
-export const buildEffects = (effects) => {
-  const { type, offset, radius, spread, color } = effects
-  if(!effects || Object.keys(effects).length == 0 || !type) return null
+export const buildEffects = (node) => {
+  const { type, offset, radius, spread, color } = node.effects[0]
+  if(!node.effects[0] || Object.keys(node.effects[0]).length == 0 || !type) return null
   if (type === 'DROP_SHADOW') {
     return `${offset.x}px ${offset.y}px ${radius}px ${spread}px rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})`    
   }
@@ -397,7 +402,6 @@ export const buildEffects = (effects) => {
     return `blur(${radius/2}px)`   
   }
 }
-
 
 /**
  * Border
