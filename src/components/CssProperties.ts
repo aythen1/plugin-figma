@@ -119,7 +119,7 @@ const specialProperties = {
     maskType: node.maskType ? getMaskType(node) : null
   }),
   fillGeometry: (node) => ({
-    clipPath: node.fillGeometry[0]?.data ? node.fillGeometry[0].data : null
+    clipPath: getfillGeometry(node)
   }),
 };
 

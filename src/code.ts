@@ -63,7 +63,7 @@ let getComponentType = (type) => {
     return 'div';
   } else if (type === 'TEXT') {
     return 'span';
-  } else if (type === 'ELLIPSE' || type === 'STAR' || type === 'VECTOR' || type === 'LINE') {
+  } else if (type === 'ELLIPSE' || type === 'STAR' || type === "POLYGON" || type === 'VECTOR' || type === 'LINE') {
     return 'svg';
   } else if (type === 'IMAGE') {
     return 'img';
@@ -79,8 +79,8 @@ let createComponent =  async (node) => {
   const hasChildren = node.type === 'GROUP' || node.type === 'FRAME' || node.type === 'INSTANCE' || node.type === 'COMPONENT';
   const componentName = (node.name).substring(0, 15);
   const cssProperties = fnNativeAttributes(node);
-  const position = getAbsolutePositionRelativeToArtboard(node)
-  const imageEncode = await getImages(node)
+  const position = getAbsolutePositionRelativeToArtboard(node);
+  const imageEncode = await getImages(node);
   
   let tree = {
     ...templateComponent,

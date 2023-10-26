@@ -482,12 +482,11 @@ export const getMaskType  = (node) => {
  * Ejemplo clip-path: path('M 0 200 L 0,75 A 5,5 0,0,1 150,75 L 200 200 z');
 */
 export const getfillGeometry = (node) => {
-  if ( node.type === "ELLIPSE" && node.fillGeometry[0].length > 0) {
-    return node.fillGeometry[0].data;
-  } 
-  // if (node.type !== "VECTOR" && node.type == "RECTANGLE" && node.fillGeometry.length > 0) {
-  //   return `${node.fillGeometry.data}`;
-  // }
+  // node.type === "LINE" --> strokeGeometry
+  // node.type === "VECTOR" --> vectorPaths
+  if (node.type === "ELLIPSE" || node.type === "POLYGON" || node.type === "STAR" && node.fillGeometry.length > 0) return node.fillGeometry[0].data
+  if (node.type === "VECTOR" && node.vectorPaths.length > 0) return node.vectorPaths[0].data
+  if (node.type === "LINE" && node.strokeGeometry[0].length > 0) return node.strokeGeometry[0].data; 
   return null;
 };
 
