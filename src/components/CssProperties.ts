@@ -11,6 +11,7 @@ import {
   getStrokeJoin,
   getMaskType,
   convertFigmaGradientToString,
+  buildWebkitText,
   buildLetterspacing,
   buildTextalign,
   buildTextcase,
@@ -31,15 +32,15 @@ const specialProperties = {
   }),
   layoutGrids: (node) => ({
     display: getDisplay(node)
-  }), 
+  }),
   layoutMode: (node) => ({
-    flexDirection: getLayoutMode(node)
+    flexDirection: node.layoutMode ? getLayoutMode(node) : null
   }),
   primaryAxisAlignItems: (node) => ({
-    justifyContent: getPrimaryAxisAlignItems(node)
+    justifyContent: node. primaryAxisAlignItems ? getPrimaryAxisAlignItems(node) : null
   }),
   counterAxisAlignItems: (node) => ({
-    alignItems: getCounterAxisAlignItems(node)
+    alignItems: node.counterAxisAlignItems ? getCounterAxisAlignItems(node) : null
   }),
   layoutWrap: (node) => ({
     flexWrap: node.flexWrap ? node.flexWrap.toLowerCase() : null
@@ -51,11 +52,13 @@ const specialProperties = {
     gap: node.itemSpacing? `${node.itemSpacing}px` : null
   }),
   fills: (node) => ({
-    background: convertFigmaGradientToString(node),
-    color: getTextColor(node),
-    backgroundColor: getBackgroundColor(node)
+    background: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? convertFigmaGradientToString(node) : null,
+    color: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? getTextColor(node) : null,
+    backgroundColor: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? getBackgroundColor(node) : null,
+    "-webkitBackgroundClip": node.type === "TEXT" ? "text" : null,
+    "-webkitTextFillColor": buildWebkitText(node)
   }),
-  strokeTopWeight: (node) => ({
+   strokeTopWeight: (node) => ({
     borderTop: node.strokeTopWeight ? buildStrokestop(node) : null
   }),
   strokeBottomWeight: (node) => ({
@@ -67,6 +70,18 @@ const specialProperties = {
   strokeLeftWeight: (node) => ({
     borderLeft: node.strokeLeftWeight ? buildStrokesleft(node) : null
   }),
+  // strokeTopWeight: (node) => ({
+  //   borderTop: node.strokeTopWeight ? buildStrokestop(node) : null
+  // }),
+  // strokeBottomWeight: (node) => ({
+  //   borderBottom: node.strokeBottomWeight ? buildStrokesbottom(node) : null
+  // }),
+  // strokeRightWeight: (node) => ({
+  //   borderRight: node.strokeRightWeight ? buildStrokesright(node) : null
+  // }),
+  // strokeLeftWeight: (node) => ({
+  //   borderLeft: node.strokeLeftWeight ? buildStrokesleft(node) : null
+  // }),
   strokes: (node) => ({
     borderColor: !node.strokes || Object.keys(node.strokes).length == 0 ? null : node.strokes[0] ? buildStrokes(node.strokes[0]) : null
   }),
@@ -107,20 +122,20 @@ const specialProperties = {
     backdropFilter: !node.effects || Object.keys(node.effects).length == 0 ? null : node.effects[0] ? buildEffects(node) : null,
   }),
   rotation: (node) => ({
-    transform: node.rotation? `rotate(${node.rotation}deg)` : null
+    transform: node.rotation ? `rotate(${node.rotation}deg)` : null
   }),
   strokeCap: (node) => ({
-    strokeLinecap: getStrokeCap(node)
+    strokeLinecap: node.strokeLinecap ? getStrokeCap(node) : null
   }),
   strokeJoin: (node) => ({
-    strokeLinejoin: getStrokeJoin(node)
+    strokeLinejoin: node.strokeLinejoin ? getStrokeJoin(node) : null
   }),
   maskType: (node) => ({
     maskType: node.maskType ? getMaskType(node) : null
   }),
   fillGeometry: (node) => ({
     clipPath: getfillGeometry(node)
-  }),
+  })
 };
 
 export const fnNativeAttributes = (node) => {    

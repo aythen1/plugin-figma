@@ -1,5 +1,5 @@
 import { fnNativeAttributes } from './components/CssProperties';
-import { getAbsolutePositionRelativeToArtboard, getImages, changeVisibility, updateZIndex } from './components/PropertiesHandlers';
+import { getAbsolutePosition, getImages, changeVisibility, updateZIndex } from './components/PropertiesHandlers';
 
 let templateComponent = {
   "tag": "span",
@@ -77,9 +77,9 @@ let id = 1
 let createComponent =  async (node) => {
   const componentType = getComponentType(node.type);
   const hasChildren = node.type === 'GROUP' || node.type === 'FRAME' || node.type === 'INSTANCE' || node.type === 'COMPONENT';
-  const componentName = (node.name).substring(0, 15);
+  const componentName = (node.name).substring(0, 24);
   const cssProperties = fnNativeAttributes(node);
-  const position = getAbsolutePositionRelativeToArtboard(node);
+  const position = getAbsolutePosition(node);
   const imageEncode = await getImages(node);
   
   let tree = {
@@ -127,8 +127,8 @@ let createComponent =  async (node) => {
         }
       },
       grid: {
-        height: node.height,
-        width: node.width,
+        height: node.height === 0 ? 1 : node.height,
+        width: node.width === 0 ? 1 : node.width,
         x: position.x,
         y: position.y,
       },
@@ -155,7 +155,7 @@ let createComponent =  async (node) => {
       })
     );
 
-    const chunkSize = 1000000; 
+    const chunkSize = 4500000;
     const childChunks = [];
 
     for (let i = 0; i < childComponents.length; i += chunkSize) {

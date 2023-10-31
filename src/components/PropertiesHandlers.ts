@@ -28,7 +28,7 @@ export const changeVisibility = (node) => {
 /**
  * Positions
 */
-export const getAbsolutePositionRelativeToArtboard = (node) => {
+export const getAbsolutePosition = (node) => {
   if (
     typeof node.x !== "number" ||
     !node.parent ||
@@ -48,8 +48,13 @@ export const getAbsolutePositionRelativeToArtboard = (node) => {
   let parent: SceneNode | null = node;
   while ((parent = parent.parent as SceneNode | null)) {
     if (!isGroupNode(parent) && typeof parent.x === "number") {
-      position.x += parent.x;
-      position.y += parent.y;
+      if (node.type === "VECTOR" && node.rotation && node.rotation > 0) {
+        position.x =  position.x + parent.x - 180;
+        position.y = position.y + parent.y - 180;
+      } else {
+        position.x += parent.x;
+        position.y += parent.y;
+      }
     }
     if (["PAGE", "DOCUMENT"].includes(parent.parent!?.type)) {
       break;
@@ -153,7 +158,7 @@ export const getCounterAxisAlignItems = (node) => {
  * @returns color | null
  */ 
 export const getBackgroundColor = (node) => {
-   if (node.type !== 'TEXT' && node.type === "RECTANGLE" || node.type === "FRAME" && node.fills.length > 0) {
+   if (node.type !== 'TEXT' &&  node.type === "RECTANGLE" || node.type === "FRAME" || node.type === 'INSTANCE' || node.type === 'COMPONENT' || node.type === 'GROUP' && node.fills.length > 0) {
     const fill = node.fills[0];
      if (fill && fill.type === 'SOLID') {
        const { r, g, b } = fill.color;
@@ -170,7 +175,7 @@ export const getBackgroundColor = (node) => {
 }
   
 export const getTextColor = (node) => {
-  if (node.type === 'TEXT' || node.type === "VECTOR" || node.type === "STAR" || node.type === "ELLIPSE" && node.fills.length > 0) {
+  if (node.type === 'TEXT' || node.type === "VECTOR" || node.type === "STAR" || node.type === "ELLIPSE" || node.type === "POLYGON" || node.type === "LINE" && node.fills.length > 0) {
     const textFill = node.fills[0];
     if (textFill.type === 'SOLID' && textFill.color) {
       const { r, g, b } = textFill.color;
@@ -202,6 +207,12 @@ export async function getImages(node) {
   return null;
 }
 
+export const buildWebkitText = (node) => { 
+  if (node.type === "TEXT" && node.fills[0] && node.fills[0].type === "GRADIENT_LINEAR") {
+    return "transparent"    
+  }
+  return null
+}
 
 const rgbToHex= (int) => {
   var hex = Number(Math.round(255 * int)).toString(16);
@@ -297,31 +308,55 @@ const figmaTransformToCSSAngle = (figmaTransform) => {
    return angleInDegrees < 0 ? angleInDegrees + 360 : angleInDegrees;
 }
 
+const transformToCSSAngle = (figmaTransform) => {
+    // Extraer los valores de la matriz de transformación
+    let a = figmaTransform[0][0];
+    let b = figmaTransform[0][1];   
+
+    // Convertir el ángulo a grados
+  let angleInDegrees = Math.round(Math.atan2(b, a) * (180 / Math.PI));
+
+    // Asegurarse de que el ángulo esté entre 0 y 360 grados
+   return angleInDegrees < 0 ? angleInDegrees + 360 : angleInDegrees;
+}
+
+const getDegrade= (matrix) => {
+  let degrees = transformToCSSAngle(matrix) || 0; 
+  return `${degrees}deg`;
+}
+
 const getDegreesForMatrix = (matrix) => {
   let degrees = figmaTransformToCSSAngle(matrix) || 0; 
   return `${degrees}deg`;
 }
 
 export const convertFigmaGradientToString = (node) => {
- const paint = node.fills.find(item => item.type === 'GRADIENT_LINEAR' || item.type === 'GRADIENT_ANGULAR' || item.type === 'GRADIENT_RADIAL' || item.type === 'GRADIENT_DIAMOND' );
-  if(!paint || paint === "undefined") return null
   
-  const { gradientTransform, gradientStops } = paint;
-  const gradientStopsString = gradientStops
-    .map((stop) => {
-      return `#${rgbToHex(stop.color.r)}${rgbToHex(stop.color.g)}${rgbToHex(stop.color.b)} ${Math.round(stop.position * 100 * 100) / 100}%`
-    })
-    .join(', ');
-  const gradientTransformString = getDegreesForMatrix(gradientTransform);
-  if (paint.type === "GRADIENT_LINEAR") {
-    return `linear-gradient(${gradientTransformString}, ${gradientStopsString})` 
-  } else if (paint.type === 'GRADIENT_RADIAL') {
-    return `radial-gradient(${gradientStopsString})`
-  } else if (paint.type === 'GRADIENT_ANGULAR') {
-    return `conic-gradient(from ${gradientTransformString}, ${gradientStopsString})`
-  } else if (paint.type === 'GRADIENT_DIAMOND') {
-    return `conic-gradient(from ${gradientTransformString}, ${gradientStopsString})`// OJO ESTE
-  }
+    const paint = node.fills.find(item => item.type === 'GRADIENT_LINEAR' || item.type === 'GRADIENT_ANGULAR' || item.type === 'GRADIENT_RADIAL' || item.type === 'GRADIENT_DIAMOND');
+    if (!paint || paint === "undefined") return null
+  
+    const { gradientTransform, gradientStops } = paint;
+    const gradientStopsString = gradientStops
+      .map((stop) => {
+        return `#${rgbToHex(stop.color.r)}${rgbToHex(stop.color.g)}${rgbToHex(stop.color.b)} ${Math.round(stop.position * 100 * 100) / 100}%`
+      })
+      .join(', ');
+    const gradientTransformString = getDegreesForMatrix(gradientTransform);
+    const gradientTransformCss = getDegrade(gradientTransform);
+  
+    if (node.type === "TEXT" && paint.type === "GRADIENT_LINEAR") {
+      return `-webkit-linear-gradient(${gradientTransformCss}, ${gradientStopsString})`
+    }
+    if (paint.type === "GRADIENT_LINEAR") {
+      return `linear-gradient(${gradientTransformString}, ${gradientStopsString})`
+    } else if (paint.type === 'GRADIENT_RADIAL') {
+      return `radial-gradient(${gradientStopsString})`
+    } else if (paint.type === 'GRADIENT_ANGULAR') {
+      return `conic-gradient(from ${gradientTransformString}, ${gradientStopsString})`
+    } else if (paint.type === 'GRADIENT_DIAMOND') {
+      return `conic-gradient(from ${gradientTransformString}, ${gradientStopsString})`// OJO ESTE
+    }
+  
 }
 
 /**
@@ -416,6 +451,53 @@ export const buildStrokes = ( strokes ) => {
   }
 }
 
+// export const buildStrokestop = (node) => {
+//   if (node.stroke[0].length > 0) {
+//     const { type, color, opacity } = node.stroke[0]  
+//     const colors = makeHex(color.r, color.g, color.b)
+//     if (type === 'SOLID') {
+//       return `${node.strokeTopWeight}px solid ${colors}`
+//     }
+//   } else {
+//     return `${node.strokeTopWeight}px solid transparent`
+//   }
+// }
+
+// export const buildStrokesbottom = (node) => {
+//   if (node.stroke[0].length > 0) {
+//     const { type, color, opacity } = node.stroke[0]
+//     const colors = makeHex(color.r, color.g, color.b)
+//     if (type === 'SOLID') {
+//       return `${node.strokeBottomWeight}px solid ${colors}`
+//     }
+//   } else {
+//     return `${node.strokeBottomWeight}px solid transparent`
+//   }
+// }
+
+// export const buildStrokesleft = (node) => {
+//   if (node.stroke[0].length > 0) {
+//     const { type, color, opacity } = node.stroke[0]   
+//     const colors = makeHex(color.r, color.g, color.b)
+//     if (type === 'SOLID') {
+//       return `${node.strokeLeftWeight}px solid ${colors}`
+//     }
+//   } else {
+//     return `${node.strokeLeftWeight}px solid transparent`
+//   }
+// }
+
+// export const buildStrokesright = (node) => {
+//   if (node.stroke[0]. length > 0) {
+//     const { type, color, opacity } = node.stroke[0]   
+//     const colors = makeHex(color.r, color.g, color.b) 
+//     if (type === 'SOLID') {
+//       return `${node.strokeRightWeight}px solid ${colors}`
+//     }    
+//   } else {
+//     return `${node.strokeRightWeight}px solid transparent`
+//   }
+// }
 export const buildStrokestop = ( node ) => {
   const { type, color, opacity } = node.strokes[0]
   if(!type) return null
