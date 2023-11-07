@@ -1,10 +1,32 @@
-export const updateZIndex = (node, depth = 0) => {
-  if (node.Property?.style?.desktop?.attribute) {
-    node.Property.style.desktop.attribute.zIndex = depth;
-  }
+export const updateZIndex = (node, zIndex = 0) => {
+  // Actualiza el zIndex del objeto actual
+  node.Property.style.desktop.attribute.zIndex = zIndex;
 
-  if (node.hasChildren && Array.isArray(node.children)) {
-    node.children.forEach(child => updateZIndex(child, depth + 2));
+  // Si el objeto tiene hijos, recorre cada uno de ellos
+  if (node.children.length > 0) {
+    for (let i = 0; i < node.children.length; i++) {
+      // Calcula el nuevo zIndex para el hijo actual
+      const newZIndex = zIndex+ i + 2;
+      // Llama a la función recursivamente para cada hijo,
+      // pasando el nuevo zIndex como argumento
+      updateZIndex(node.children[i], newZIndex);
+    }
+  }
+}
+
+export const modifyZIndex = (node, zIndex = 0 ) => {
+  // Actualiza el zIndex del objeto actual
+  node.Property.style.desktop.attribute.zIndex = zIndex;
+
+  // Si el objeto tiene hijos, recorre cada uno de ellos
+  if ( node.children.length > 0) {
+    for (let i = 0; i < node.children.length; i++) {
+      // Calcula el nuevo zIndex para el hijo actual
+      const newZIndex = zIndex + node.children.length - i;
+      // Llama a la función recursivamente para cada hijo,
+      // pasando el nuevo zIndex como argumento
+      modifyZIndex(node.children[i], newZIndex);
+    }
   }
 }
 
@@ -191,18 +213,21 @@ export const getTextColor = (node) => {
   return "transparent";
 }
 
+
 export async function getImages(node) {
-  if (node.fills && node.fills.length > 0) {
+  if (node.fills && node.fills[0]) {
   const image = node.fills[0]
   if (image.type === "IMAGE") {
       const imageConvert = figma.getImageByHash(image.imageHash)
       const imageEncode = await imageConvert.getBytesAsync()
       const imgArray = Object.values(imageEncode)
+      
     return {
       image: imgArray,
       src: ""
     }
-    } 
+  }
+    return null
   } 
   return null;
 }
@@ -330,8 +355,29 @@ const getDegreesForMatrix = (matrix) => {
   return `${degrees}deg`;
 }
 
-export const convertFigmaGradientToString = (node) => {
+export const convertBorderGradient = (node) => {  
+    const paint = node.fills.find(item => item.type === 'GRADIENT_LINEAR' || item.type === 'GRADIENT_ANGULAR' || item.type === 'GRADIENT_RADIAL' || item.type === 'GRADIENT_DIAMOND');
+    if (!paint || paint === "undefined") return null
   
+    const { gradientTransform, gradientStops } = paint;
+    const gradientStopsString = gradientStops
+      .map((stop) => {
+        return `#${rgbToHex(stop.color.r)}${rgbToHex(stop.color.g)}${rgbToHex(stop.color.b)} ${Math.round(stop.position * 100 * 100) / 100}%`
+      })
+      .join(', ');
+    const gradientTransformString = getDegreesForMatrix(gradientTransform);    
+    if (paint.type === "GRADIENT_LINEAR") {
+      return `linear-gradient(${gradientTransformString}, ${gradientStopsString}) 1`
+    } else if (paint.type === 'GRADIENT_RADIAL') {
+      return `radial-gradient(${gradientStopsString}) 1`
+    } else if (paint.type === 'GRADIENT_ANGULAR') {
+      return `conic-gradient(from ${gradientTransformString}, ${gradientStopsString}) 1`
+    } else if (paint.type === 'GRADIENT_DIAMOND') {
+      return `conic-gradient(from ${gradientTransformString}, ${gradientStopsString}) 1`// OJO ESTE
+    }  
+}
+
+export const convertFigmaGradientToString = (node) => {  
     const paint = node.fills.find(item => item.type === 'GRADIENT_LINEAR' || item.type === 'GRADIENT_ANGULAR' || item.type === 'GRADIENT_RADIAL' || item.type === 'GRADIENT_DIAMOND');
     if (!paint || paint === "undefined") return null
   
@@ -355,8 +401,7 @@ export const convertFigmaGradientToString = (node) => {
       return `conic-gradient(from ${gradientTransformString}, ${gradientStopsString})`
     } else if (paint.type === 'GRADIENT_DIAMOND') {
       return `conic-gradient(from ${gradientTransformString}, ${gradientStopsString})`// OJO ESTE
-    }
-  
+    }  
 }
 
 /**

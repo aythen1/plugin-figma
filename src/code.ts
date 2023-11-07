@@ -1,5 +1,5 @@
 import { fnNativeAttributes } from './components/CssProperties';
-import { getAbsolutePosition, getImages, changeVisibility, updateZIndex } from './components/PropertiesHandlers';
+import { getAbsolutePosition, getImages, changeVisibility, updateZIndex, modifyZIndex } from './components/PropertiesHandlers';
 
 let templateComponent = {
   "tag": "span",
@@ -142,12 +142,10 @@ let createComponent =  async (node) => {
   
     
   if ((node.type === 'RECTANGLE' || node.type === 'TEXT') && node.fills) {
-    tree.image = imageEncode;
     tree.tag = imageEncode?.image?.length > 3 ? "img" : componentType
     tree.tagName = imageEncode?.image?.length > 3 ? "img" : componentType
-    tree.name = imageEncode?.image?.length > 3 ? "img" : componentName
   }
-  if (hasChildren && !(componentType == 'svg')) {
+  if (hasChildren && !(componentType === 'svg')) {
     const childComponents = await Promise.all(
       node.children.map(async (childNode) => {
         const childComponent = await createComponent(childNode);
@@ -155,7 +153,7 @@ let createComponent =  async (node) => {
       })
     );
 
-    const chunkSize = 4500000;
+    const chunkSize = 90000000;
     const childChunks = [];
 
     for (let i = 0; i < childComponents.length; i += chunkSize) {

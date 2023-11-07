@@ -24,11 +24,12 @@ import {
   buildStrokesbottom,
   buildStrokesright,
   buildStrokestop,
+  convertBorderGradient,
 } from './PropertiesHandlers';
 
 const specialProperties = {
   parent: () => ({
-    zIndex: 1
+    zIndex: 0
   }),
   layoutGrids: (node) => ({
     display: getDisplay(node)
@@ -56,7 +57,8 @@ const specialProperties = {
     color: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? getTextColor(node) : null,
     backgroundColor: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? getBackgroundColor(node) : null,
     "-webkitBackgroundClip": node.type === "TEXT" ? "text" : null,
-    "-webkitTextFillColor": buildWebkitText(node)
+    "-webkitTextFillColor": buildWebkitText(node),
+    borderImage: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? convertBorderGradient(node) : null,
   }),
    strokeTopWeight: (node) => ({
     borderTop: node.strokeTopWeight ? buildStrokestop(node) : null
@@ -70,19 +72,8 @@ const specialProperties = {
   strokeLeftWeight: (node) => ({
     borderLeft: node.strokeLeftWeight ? buildStrokesleft(node) : null
   }),
-  // strokeTopWeight: (node) => ({
-  //   borderTop: node.strokeTopWeight ? buildStrokestop(node) : null
-  // }),
-  // strokeBottomWeight: (node) => ({
-  //   borderBottom: node.strokeBottomWeight ? buildStrokesbottom(node) : null
-  // }),
-  // strokeRightWeight: (node) => ({
-  //   borderRight: node.strokeRightWeight ? buildStrokesright(node) : null
-  // }),
-  // strokeLeftWeight: (node) => ({
-  //   borderLeft: node.strokeLeftWeight ? buildStrokesleft(node) : null
-  // }),
   strokes: (node) => ({
+    // borderStyle: "solid",
     borderColor: !node.strokes || Object.keys(node.strokes).length == 0 ? null : node.strokes[0] ? buildStrokes(node.strokes[0]) : null
   }),
   strokeWeight: (node) => ({
