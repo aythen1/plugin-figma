@@ -73,6 +73,7 @@ let getComponentType = (type) => {
 }
 
 
+
 let id = 1
 let createComponent =  async (node) => {
   const componentType = getComponentType(node.type);
@@ -118,7 +119,7 @@ let createComponent =  async (node) => {
         desktop: {
           width: "1920",
           active: true,
-          attribute:cssProperties,
+          attribute: cssProperties,
         },
         mobileLandscape: {
           width: "767",
