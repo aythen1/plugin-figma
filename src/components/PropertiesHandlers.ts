@@ -14,6 +14,24 @@ export const updateZIndex = (node, zIndex = 0) => {
   }
 }
 
+export const updateProperties = (data, originalX = data.Property.grid.x, originalY = data.Property.grid.y) => {
+    if (data.figmaId === 1) {
+        originalX = data.Property.grid.x;
+        originalY = data.Property.grid.y;
+        data.Property.grid.x = 0;
+        data.Property.grid.y = 0;
+    }
+    if (data.hasChildren) {
+        data.children.forEach(child => {
+            child.Property.grid.x -= originalX;
+            child.Property.grid.y -= originalY;
+            updateProperties(child, originalX, originalY);
+        });
+    }
+}
+
+
+
 export const modifyZIndex = (node, zIndex = 0 ) => {
   // Actualiza el zIndex del objeto actual
   node.Property.style.desktop.attribute.zIndex = zIndex;
@@ -53,8 +71,7 @@ export const changeVisibility = (node) => {
 export const getAbsolutePosition = (node) => {
   if (
     typeof node.x !== "number" ||
-    !node.parent ||
-    ["PAGE", "DOCUMENT"].includes(node.type)
+    !node.parent
   ) {
     return { x: 0, y: 0 };
   }

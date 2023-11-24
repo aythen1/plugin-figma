@@ -1,5 +1,5 @@
 import { fnNativeAttributes } from './components/CssProperties';
-import { getAbsolutePosition, getImages, changeVisibility, updateZIndex, modifyZIndex } from './components/PropertiesHandlers';
+import { getAbsolutePosition, getImages, changeVisibility, updateZIndex, updateProperties } from './components/PropertiesHandlers';
 
 let templateComponent = {
   "tag": "span",
@@ -154,12 +154,14 @@ let createComponent =  async (node) => {
       })
     );
 
-    const chunkSize = 90000000;
+    // const chunkSize = 90000000;
+    const chunkSize = 4500000;
     const childChunks = [];
 
     for (let i = 0; i < childComponents.length; i += chunkSize) {
       const chunk = childComponents.slice(i, i + chunkSize);
-      childChunks.push(chunk);
+    
+    childChunks.push(childComponents);
     }   
     for (const chunk of childChunks) {
       tree.children.push(...chunk);
@@ -178,6 +180,7 @@ figma.ui.onmessage = async (msg) => {
       const jsonTree = await createComponent(selectedComponent);
       changeVisibility(jsonTree)
       updateZIndex(jsonTree)
+      updateProperties(jsonTree)
       const jsonText = JSON.stringify(jsonTree, null, 2);
       
       figma.ui.postMessage({ type: "json-data", data: jsonText });
