@@ -237,7 +237,7 @@ export async function getImages(node) {
   if (image.type === "IMAGE") {
       const imageConvert = figma.getImageByHash(image.imageHash)
       const imageEncode = await imageConvert.getBytesAsync()
-      const imgArray = Object.values(imageEncode)
+    const imgArray = Object.values(imageEncode)
       
     return {
       image: imgArray,

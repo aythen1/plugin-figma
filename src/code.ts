@@ -6,10 +6,11 @@ let templateComponent = {
   "name": "span",
   "tagName": "" ,
   "attributes": {},
-  "image":[],
+  "image": [],
+  "src":"",
   "nativeAttributes": {
     "value": "text",
-    "innerHTML": "text"
+    "innerHTML": ""
   },
   "isShow": true,
   "isDeleted": false,
@@ -142,9 +143,9 @@ let createComponent =  async (node) => {
   };
   
     
-  if ((node.type === 'RECTANGLE' || node.type === 'TEXT') && node.fills) {
+  if ((node.type === 'RECTANGLE' || node.type === 'TEXT' || node.type === 'FRAME' ) && node.fills) {
     tree.tag = imageEncode?.image?.length > 3 ? "img" : componentType
-    tree.tagName = imageEncode?.image?.length > 3 ? "img" : componentType
+    tree.tagName = tree.image?.image || imageEncode?.image?.length > 3 ?  "img" : componentType
   }
   if (hasChildren && !(componentType === 'svg')) {
     const childComponents = await Promise.all(
