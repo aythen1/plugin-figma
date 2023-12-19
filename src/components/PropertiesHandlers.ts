@@ -513,62 +513,30 @@ export const buildStrokes = ( strokes ) => {
   }
 }
 
-export const buildStrokesBorderImage = ( strokes ) => {
-    console.log(strokes)
-    const { type, gradientStops } = strokes
-    if(!type) return null
-    if(type === 'GRADIENT_LINEAR'){
-      console.log(gradientStops, 'estas son las gradientes en el plugin de figma')
-    }
+
+export const buildStrokesBorderGradient = (stroke) => {
+    const paint = stroke.find(item => item.type === 'GRADIENT_LINEAR' || item.type === 'GRADIENT_ANGULAR' || item.type === 'GRADIENT_RADIAL' || item.type === 'GRADIENT_DIAMOND');
+    if (!paint || paint === "undefined") return null
+  
+    const { gradientTransform, gradientStops } = paint;
+    const gradientStopsString = gradientStops
+      .map((stop) => {
+        return `#${rgbToHex(stop.color.r)}${rgbToHex(stop.color.g)}${rgbToHex(stop.color.b)} ${Math.round(stop.position * 100 * 100) / 100}%`
+      })
+      .join(', ');
+    const gradientTransformString = getDegreesForMatrix(gradientTransform);    
+    if (paint.type === "GRADIENT_LINEAR") {
+      return `linear-gradient(${gradientTransformString}, ${gradientStopsString}) 1`
+    } else if (paint.type === 'GRADIENT_RADIAL') {
+      return `radial-gradient(${gradientStopsString}) 1`
+    } else if (paint.type === 'GRADIENT_ANGULAR') {
+      return `conic-gradient(from ${gradientTransformString}, ${gradientStopsString}) 1`
+    } else if (paint.type === 'GRADIENT_DIAMOND') {
+      return `conic-gradient(from ${gradientTransformString}, ${gradientStopsString}) 1`// OJO ESTE
+    }  
 }
 
-// export const buildStrokestop = (node) => {
-//   if (node.stroke[0].length > 0) {
-//     const { type, color, opacity } = node.stroke[0]  
-//     const colors = makeHex(color.r, color.g, color.b)
-//     if (type === 'SOLID') {
-//       return `${node.strokeTopWeight}px solid ${colors}`
-//     }
-//   } else {
-//     return `${node.strokeTopWeight}px solid transparent`
-//   }
-// }
 
-// export const buildStrokesbottom = (node) => {
-//   if (node.stroke[0].length > 0) {
-//     const { type, color, opacity } = node.stroke[0]
-//     const colors = makeHex(color.r, color.g, color.b)
-//     if (type === 'SOLID') {
-//       return `${node.strokeBottomWeight}px solid ${colors}`
-//     }
-//   } else {
-//     return `${node.strokeBottomWeight}px solid transparent`
-//   }
-// }
-
-// export const buildStrokesleft = (node) => {
-//   if (node.stroke[0].length > 0) {
-//     const { type, color, opacity } = node.stroke[0]   
-//     const colors = makeHex(color.r, color.g, color.b)
-//     if (type === 'SOLID') {
-//       return `${node.strokeLeftWeight}px solid ${colors}`
-//     }
-//   } else {
-//     return `${node.strokeLeftWeight}px solid transparent`
-//   }
-// }
-
-// export const buildStrokesright = (node) => {
-//   if (node.stroke[0]. length > 0) {
-//     const { type, color, opacity } = node.stroke[0]   
-//     const colors = makeHex(color.r, color.g, color.b) 
-//     if (type === 'SOLID') {
-//       return `${node.strokeRightWeight}px solid ${colors}`
-//     }    
-//   } else {
-//     return `${node.strokeRightWeight}px solid transparent`
-//   }
-// }
 export const buildStrokestop = ( node ) => {
   const { type, color, opacity } = node.strokes[0]
   if(!type) return null

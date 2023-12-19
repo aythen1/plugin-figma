@@ -23,7 +23,9 @@ function App() {
 
     try {
 
-      const jsonGenerationTime = 8000;
+
+      const jsonGenerationTime = 18000;
+
       const endTime = startTime + jsonGenerationTime;
 
       while (Date.now() < endTime) {
