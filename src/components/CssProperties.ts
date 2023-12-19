@@ -25,6 +25,7 @@ import {
   buildStrokesright,
   buildStrokestop,
   convertBorderGradient,
+  buildStrokesBorderImage,
 } from './PropertiesHandlers';
 
 const specialProperties = {
@@ -74,6 +75,7 @@ const specialProperties = {
   }),
   strokes: (node) => ({
     // borderStyle: "solid",
+    borderImage: !node.strokes || Object.keys(node.strokes).length == 0 ? null : buildStrokesBorderImage(node.strokes),
     borderColor: !node.strokes || Object.keys(node.strokes).length == 0 ? null : node.strokes[0] ? buildStrokes(node.strokes[0]) : null
   }),
   strokeWeight: (node) => ({

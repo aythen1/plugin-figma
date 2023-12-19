@@ -513,6 +513,15 @@ export const buildStrokes = ( strokes ) => {
   }
 }
 
+export const buildStrokesBorderImage = ( strokes ) => {
+    console.log(strokes)
+    const { type, gradientStops } = strokes
+    if(!type) return null
+    if(type === 'GRADIENT_LINEAR'){
+      console.log(gradientStops, 'estas son las gradientes en el plugin de figma')
+    }
+}
+
 // export const buildStrokestop = (node) => {
 //   if (node.stroke[0].length > 0) {
 //     const { type, color, opacity } = node.stroke[0]  
