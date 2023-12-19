@@ -513,8 +513,30 @@ export const buildStrokes = ( strokes ) => {
   }
 }
 
+// const variable = {
+//   position: 'relative',
+//   width: '500px',
+//   height: '500px',
+//   color: 'red',
+//   display: 'flex',
+//   justifyContent: 'center',
+//   alignItems: 'center',
+//   backgroundColor: 'white',
+//   borderRadius:' 50%', 
+//   "&::before": {
+//     content: "",
+//     position: 'absolute',
+//     inset: '0',
+//     borderRadius: '50%', 
+//     padding: '10px', 
+//     background:`linear-gradient(45deg,rgb(17, 1, 236),rgb(255, 123, 0))`, 
+//     WebkitMask: `linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)`,
+//     WebkitMaskComposite: 'xor',
+//     markComposite: 'exclude',
+//   }
 
 export const buildStrokesBorderGradient = (stroke) => {
+
     const paint = stroke.find(item => item.type === 'GRADIENT_LINEAR' || item.type === 'GRADIENT_ANGULAR' || item.type === 'GRADIENT_RADIAL' || item.type === 'GRADIENT_DIAMOND');
     if (!paint || paint === "undefined") return null
   
