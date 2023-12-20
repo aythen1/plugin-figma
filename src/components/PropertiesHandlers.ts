@@ -537,31 +537,30 @@ export const buildStrokes = ( strokes ) => {
 
 export const buildStrokesBorderGradient = (node) => {
   
-    // const paint = node.strokes[0].find(item => item.type === 'GRADIENT_LINEAR' || item.type === 'GRADIENT_ANGULAR' || item.type === 'GRADIENT_RADIAL' || item.type === 'GRADIENT_DIAMOND');
-   
-    // console.log(paint, 'esto es el paint')
-    const { gradientTransform, gradientStops } = node.strokes[0];
-    const gradientStopsString = gradientStops
-      .map((stop) => {
-        return `#${rgbToHex(stop.color.r)}${rgbToHex(stop.color.g)}${rgbToHex(stop.color.b)} ${Math.round(stop.position * 100 * 100) / 100}%`
-      })
-      .join(', ');
-    const gradientTransformString = getDegreesForMatrix(gradientTransform);    
-    if (node.strokes[0].type) {
-          const data = {
-            content: "",
-            position: 'absolute',
-            inset: '0',
-            borderRadius: `${node.topLeftRadius ? node.topLeftRadius : 0}px ${node.topRightRadius ? node.topRightRadius : 0}px ${node.bottomRightRadius ? node.bottomRightRadius : 0}px ${node.bottomLeftRadius ? node.bottomLeftRadius : 0}px`, 
-            padding: `${node.paddingTop ? node.paddingTop : 0}px ${node.paddingRight ? node.paddingRight : 0}px ${node.paddingBottom ? node.paddingBottom : 0}px ${node.paddingLeft ? node.paddingLeft : 0}px`, 
-            background:`linear-gradient(${gradientTransformString}, ${gradientStopsString})`, 
-            WebkitMask: `linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)`,
-            WebkitMaskComposite: 'xor',
-            markComposite: 'exclude',
-          }
-        
-      return data
-    } 
+  // const paint = node.strokes[0].find(item => item.type === 'GRADIENT_LINEAR' || item.type === 'GRADIENT_ANGULAR' || item.type === 'GRADIENT_RADIAL' || item.type === 'GRADIENT_DIAMOND');
+ 
+  // console.log(paint, 'esto es el paint')
+  const { gradientTransform, gradientStops } = node.strokes[0];
+  const gradientStopsString = gradientStops
+    .map((stop) => {
+      return `#${rgbToHex(stop.color.r)}${rgbToHex(stop.color.g)}${rgbToHex(stop.color.b)} ${Math.round(stop.position * 100 * 100) / 100}%`
+    })
+    .join(', ');
+  const gradientTransformString = getDegreesForMatrix(gradientTransform);    
+  if (node.strokes[0].type) {
+        const data = {
+          content: "",
+          position: 'absolute',
+          inset: '0',
+          borderRadius: `${node.topLeftRadius ? node.topLeftRadius : 0}px ${node.topRightRadius ? node.topRightRadius : 0}px ${node.bottomRightRadius ? node.bottomRightRadius : 0}px ${node.bottomLeftRadius ? node.bottomLeftRadius : 0}px`, 
+          padding: `${node.strokeWeight}px ${node.strokeWeight}px ${node.strokeWeight}px ${node.strokeWeight}px`, 
+          background:`linear-gradient(${gradientTransformString}, ${gradientStopsString})`, 
+          WebkitMask: `linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)`,
+          WebkitMaskComposite: 'xor',
+          markComposite: 'exclude',
+        }        
+    return data
+  } 
 }
 
 

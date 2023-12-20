@@ -134,19 +134,18 @@ const specialProperties = {
   })
 };
 
-
 export const fnNativeAttributes = (node) => {    
   const allPropertyNames = [
       // "id",
       // "onmessage",
       // "currentPage",
       // "type", 
-      // "visible",
       // "name",
       // "description",
       // "x",
       // "y",
       // "parent",
+      "visible",
       "width",
       "height",
       "maxHeight",
