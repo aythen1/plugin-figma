@@ -535,27 +535,33 @@ export const buildStrokes = ( strokes ) => {
 //     markComposite: 'exclude',
 //   }
 
-export const buildStrokesBorderGradient = (stroke) => {
-
-    const paint = stroke.find(item => item.type === 'GRADIENT_LINEAR' || item.type === 'GRADIENT_ANGULAR' || item.type === 'GRADIENT_RADIAL' || item.type === 'GRADIENT_DIAMOND');
-    if (!paint || paint === "undefined") return null
+export const buildStrokesBorderGradient = (node) => {
   
-    const { gradientTransform, gradientStops } = paint;
+    // const paint = node.strokes[0].find(item => item.type === 'GRADIENT_LINEAR' || item.type === 'GRADIENT_ANGULAR' || item.type === 'GRADIENT_RADIAL' || item.type === 'GRADIENT_DIAMOND');
+   
+    // console.log(paint, 'esto es el paint')
+    const { gradientTransform, gradientStops } = node.strokes[0];
     const gradientStopsString = gradientStops
       .map((stop) => {
         return `#${rgbToHex(stop.color.r)}${rgbToHex(stop.color.g)}${rgbToHex(stop.color.b)} ${Math.round(stop.position * 100 * 100) / 100}%`
       })
       .join(', ');
     const gradientTransformString = getDegreesForMatrix(gradientTransform);    
-    if (paint.type === "GRADIENT_LINEAR") {
-      return `linear-gradient(${gradientTransformString}, ${gradientStopsString}) 1`
-    } else if (paint.type === 'GRADIENT_RADIAL') {
-      return `radial-gradient(${gradientStopsString}) 1`
-    } else if (paint.type === 'GRADIENT_ANGULAR') {
-      return `conic-gradient(from ${gradientTransformString}, ${gradientStopsString}) 1`
-    } else if (paint.type === 'GRADIENT_DIAMOND') {
-      return `conic-gradient(from ${gradientTransformString}, ${gradientStopsString}) 1`// OJO ESTE
-    }  
+    if (node.strokes[0].type) {
+          const data = {
+            content: "",
+            position: 'absolute',
+            inset: '0',
+            borderRadius: `${node.topLeftRadius ? node.topLeftRadius : 0}px ${node.topRightRadius ? node.topRightRadius : 0}px ${node.bottomRightRadius ? node.bottomRightRadius : 0}px ${node.bottomLeftRadius ? node.bottomLeftRadius : 0}px`, 
+            padding: `${node.paddingTop ? node.paddingTop : 0}px ${node.paddingRight ? node.paddingRight : 0}px ${node.paddingBottom ? node.paddingBottom : 0}px ${node.paddingLeft ? node.paddingLeft : 0}px`, 
+            background:`linear-gradient(${gradientTransformString}, ${gradientStopsString})`, 
+            WebkitMask: `linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)`,
+            WebkitMaskComposite: 'xor',
+            markComposite: 'exclude',
+          }
+        
+      return data
+    } 
 }
 
 
