@@ -231,45 +231,44 @@ export const getTextColor = (node) => {
 }
 
 
-export async function getImages(node) {
-  if (node.fills && node.fills[0]) {
-  const image = node.fills[0]
-  if (image.type === "IMAGE") {
-      const imageConvert = figma.getImageByHash(image.imageHash)
-      const imageEncode = await imageConvert.getBytesAsync()
-    const imgArray = Object.values(imageEncode)
+// export async function getImages(node) {
+//   if (node.fills && node.fills[0]) {
+//   const image = node.fills[0]
+//   if (image.type === "IMAGE") {
+//       const imageConvert = figma.getImageByHash(image.imageHash)
+//       const imageEncode = await imageConvert.getBytesAsync()
+//     const imgArray = Object.values(imageEncode)
       
-    return {
-      image: imgArray,
-      src: ""
-    }
-  }
-    return null
+//     return {
+//       image: imgArray,
+//       src: ""
+//     }
+//   }
+//     return null
+//   }
+//   return null;
+// }
+
+export async function getImages(node) {
+  if (node.fills && node.fills.length > 0) {
+     const image = node.fills.map(async (fill) => {
+      if (fill.type === "IMAGE") {
+        const imageConvert = figma.getImageByHash(fill.imageHash);
+        const imageEncode = await imageConvert.getBytesAsync();
+        const imgArray = Object.values(imageEncode);
+
+        return {
+          image: imgArray,
+          src: ""
+        };
+      }
+      return null;
+     });
+    const resp = image.filter(img => img !== null)
+    return resp[0]
   } 
   return null;
 }
-
-// export async function getImages(node) {
-//   if (node.fills && node.fills.length > 0) {
-//      node.fills.map(async (fill) => {
-//       if (fill.type === "IMAGE") {
-//         const imageConvert = figma.getImageByHash(fill.imageHash);
-//         const imageEncode = await imageConvert.getBytesAsync();
-//         const imgArray = Object.values(imageEncode);
-
-//         return {
-//           image: imgArray,
-//           src: ""
-//         };
-//       }
-//       return null;
-//     });
-
-//     // // Filtramos los resultados nulos
-//     // return image.filter(image => image !== null);
-//   } 
-//   return null;
-// }
 
 export const buildWebkitText = (node) => { 
   if (node.type === "TEXT" && node.fills[0] && node.fills[0].type === "GRADIENT_LINEAR") {

@@ -56,15 +56,15 @@ const specialProperties = {
   itemSpacing: (node) => ({
     gap: node.itemSpacing? `${node.itemSpacing}px` : null
   }),
-  fills: (node) => ({
-    background: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? convertFigmaGradientToString(node) : null,
-    color: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? getTextColor(node) : null,
-    backgroundColor: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? getBackgroundColor(node) : null,
-    "-webkitBackgroundClip": node.type === "TEXT" ? "text" : null,
-    "-webkitTextFillColor": buildWebkitText(node),
-    borderImage: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? convertBorderGradient(node) : null,
-    // backgroundImage: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? getImages(node) : null,
-  }),
+  // fills: (node) => ({
+  //   background: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? convertFigmaGradientToString(node) : null,
+  //   color: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? getTextColor(node) : null,
+  //   backgroundColor: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? getBackgroundColor(node) : null,
+  //   "-webkitBackgroundClip": node.type === "TEXT" ? "text" : null,
+  //   "-webkitTextFillColor": buildWebkitText(node),
+  //   borderImage: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? convertBorderGradient(node) : null,
+  //   // backgroundImage: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? getImages(node) : null,
+  // }),
    strokeTopWeight: (node) => ({
     borderTop: node.strokeTopWeight ? buildStrokestop(node) : null
   }),
