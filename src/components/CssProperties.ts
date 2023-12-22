@@ -27,6 +27,7 @@ import {
   convertBorderGradient,
 
   buildStrokesBorderGradient,
+  getImages,
 
 } from './PropertiesHandlers';
 
@@ -62,6 +63,7 @@ const specialProperties = {
     "-webkitBackgroundClip": node.type === "TEXT" ? "text" : null,
     "-webkitTextFillColor": buildWebkitText(node),
     borderImage: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? convertBorderGradient(node) : null,
+    // backgroundImage: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? getImages(node) : null,
   }),
    strokeTopWeight: (node) => ({
     borderTop: node.strokeTopWeight ? buildStrokestop(node) : null
@@ -77,9 +79,11 @@ const specialProperties = {
   }),
   strokes: (node) => ({
     // borderStyle: "solid",
-
-    "&::before": buildStrokesBorderGradient(node) ,
-    // borderColor: !node.strokes || Object.keys(node.strokes).length == 0 ? null : node.strokes[0] ? buildStrokes(node.strokes[0]) : null
+    borderColor: !node.strokes || Object.keys(node.strokes).length == 0 ? null : node.strokes[0] ? buildStrokes(node) : null,
+    // "&::before": !node.strokes || Object.keys(node.strokes).length == 0 ? null : buildStrokesBorderGradient(node)
+  }),
+  id: (node) => ({
+    "&::before": !node.strokes || Object.keys(node.strokes).length == 0 ? null : buildStrokesBorderGradient(node)
   }),
   strokeWeight: (node) => ({
     borderWidth: node.strokeWeight ? `${node.strokeWeight}px` : null
@@ -136,15 +140,15 @@ const specialProperties = {
 
 export const fnNativeAttributes = (node) => {    
   const allPropertyNames = [
-      // "id",
-      // "onmessage",
-      // "currentPage",
-      // "type", 
-      // "name",
+    // "onmessage",
+    // "currentPage",
+    // "type", 
+    // "name",
       // "description",
       // "x",
       // "y",
       // "parent",
+      "id",
       "visible",
       "width",
       "height",

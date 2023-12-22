@@ -249,6 +249,28 @@ export async function getImages(node) {
   return null;
 }
 
+// export async function getImages(node) {
+//   if (node.fills && node.fills.length > 0) {
+//      node.fills.map(async (fill) => {
+//       if (fill.type === "IMAGE") {
+//         const imageConvert = figma.getImageByHash(fill.imageHash);
+//         const imageEncode = await imageConvert.getBytesAsync();
+//         const imgArray = Object.values(imageEncode);
+
+//         return {
+//           image: imgArray,
+//           src: ""
+//         };
+//       }
+//       return null;
+//     });
+
+//     // // Filtramos los resultados nulos
+//     // return image.filter(image => image !== null);
+//   } 
+//   return null;
+// }
+
 export const buildWebkitText = (node) => { 
   if (node.type === "TEXT" && node.fills[0] && node.fills[0].type === "GRADIENT_LINEAR") {
     return "transparent"    
@@ -504,8 +526,8 @@ export const buildEffects = (node) => {
  * Border
  * border: 1px solid #000;
  */  
-export const buildStrokes = ( strokes ) => {
-  const { type, color, opacity } = strokes
+export const buildStrokes = ( node ) => {
+  const { type, color, opacity } = node.strokes[0]
   if(!type) return null
   const colors = makeHex(color.r, color.g, color.b) 
   if (type === 'SOLID') {
@@ -540,15 +562,16 @@ export const buildStrokesBorderGradient = (node) => {
   // const paint = node.strokes[0].find(item => item.type === 'GRADIENT_LINEAR' || item.type === 'GRADIENT_ANGULAR' || item.type === 'GRADIENT_RADIAL' || item.type === 'GRADIENT_DIAMOND');
  
   // console.log(paint, 'esto es el paint')
-  const { gradientTransform, gradientStops } = node.strokes[0];
-  const gradientStopsString = gradientStops
+  if (node.strokes[0].type) {    
+    const { gradientTransform, gradientStops } = node.strokes[0];
+    const gradientStopsString = gradientStops
     .map((stop) => {
       return `#${rgbToHex(stop.color.r)}${rgbToHex(stop.color.g)}${rgbToHex(stop.color.b)} ${Math.round(stop.position * 100 * 100) / 100}%`
     })
     .join(', ');
-  const gradientTransformString = getDegreesForMatrix(gradientTransform);    
-  if (node.strokes[0].type) {
-        const data = {
+    const gradientTransformString = getDegreesForMatrix(gradientTransform);    
+    if (node.strokes[0].type) {
+      const data = {
           content: "",
           position: 'absolute',
           inset: '0',
@@ -561,6 +584,7 @@ export const buildStrokesBorderGradient = (node) => {
         }        
     return data
   } 
+} return null
 }
 
 
