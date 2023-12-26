@@ -56,15 +56,15 @@ const specialProperties = {
   itemSpacing: (node) => ({
     gap: node.itemSpacing? `${node.itemSpacing}px` : null
   }),
-  // fills: (node) => ({
-  //   background: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? convertFigmaGradientToString(node) : null,
-  //   color: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? getTextColor(node) : null,
-  //   backgroundColor: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? getBackgroundColor(node) : null,
-  //   "-webkitBackgroundClip": node.type === "TEXT" ? "text" : null,
-  //   "-webkitTextFillColor": buildWebkitText(node),
-  //   borderImage: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? convertBorderGradient(node) : null,
-  //   // backgroundImage: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? getImages(node) : null,
-  // }),
+  fills: (node) => ({
+    background: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? convertFigmaGradientToString(node) : null,
+    color: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? getTextColor(node) : null,
+    backgroundColor: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? getBackgroundColor(node) : null,
+    "-webkitBackgroundClip": node.type === "TEXT" ? "text" : null,
+    "-webkitTextFillColor": buildWebkitText(node),
+    borderImage: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? convertBorderGradient(node) : null,
+    // backgroundImage: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? getImages(node) : null,
+  }),
    strokeTopWeight: (node) => ({
     borderTop: node.strokeTopWeight ? buildStrokestop(node) : null
   }),
@@ -80,7 +80,6 @@ const specialProperties = {
   strokes: (node) => ({
     // borderStyle: "solid",
     borderColor: !node.strokes || Object.keys(node.strokes).length == 0 ? null : node.strokes[0] ? buildStrokes(node) : null,
-    // "&::before": !node.strokes || Object.keys(node.strokes).length == 0 ? null : buildStrokesBorderGradient(node)
   }),
   id: (node) => ({
     "&::before": !node.strokes || Object.keys(node.strokes).length == 0 ? null : buildStrokesBorderGradient(node)
