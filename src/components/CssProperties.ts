@@ -25,9 +25,10 @@ import {
   buildStrokesright,
   buildStrokestop,
   convertBorderGradient,
-
   buildStrokesBorderGradient,
+  buildGradientStroke,
   getImages,
+  buildGradientFills,
 
 } from './PropertiesHandlers';
 
@@ -65,7 +66,13 @@ const specialProperties = {
     borderImage: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? convertBorderGradient(node) : null,
     // backgroundImage: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? getImages(node) : null,
   }),
-   strokeTopWeight: (node) => ({
+  blendMode: (node) => ({
+    gradientStroke: !node.strokes || Object.keys(node.strokes).length == 0 ? null: buildGradientStroke(node)
+  }),
+  type: (node) => ({
+    gradientFill: !node.strokes || Object.keys(node.fills).length == 0 ? null: buildGradientFills(node)
+  }),
+  strokeTopWeight: (node) => ({
     borderTop: node.strokeTopWeight ? buildStrokestop(node) : null
   }),
   strokeBottomWeight: (node) => ({
@@ -139,14 +146,15 @@ const specialProperties = {
 
 export const fnNativeAttributes = (node) => {    
   const allPropertyNames = [
-    // "onmessage",
     // "currentPage",
-    // "type", 
     // "name",
-      // "description",
-      // "x",
-      // "y",
-      // "parent",
+    // "description",
+    // "x",
+    // "y",
+    // "parent",
+    // "onmessage",
+      "type",
+      "blendMode", 
       "id",
       "visible",
       "width",

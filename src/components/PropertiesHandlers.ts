@@ -442,6 +442,115 @@ export const convertFigmaGradientToString = (node) => {
     }  
 }
 
+// <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+//       <defs>
+//         {/* Gradiente para el relleno (fondo) /}
+//         <linearGradient id="fillGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+//           <stop offset="0%" style={{ stopColor: "red", stopOpacity: 1 }} />
+//           <stop offset="50%" style={{ stopColor: "blue", stopOpacity: 1 }} />
+//           <stop offset="100%" style={{ stopColor: "green", stopOpacity: 1 }} />
+//         </linearGradient>
+
+//         {/ Gradiente para los bordes */}
+//         <linearGradient id="strokeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+//           <stop offset="0%" style={{ stopColor: "green", stopOpacity: 1 }} />
+//           <stop offset="50%" style={{ stopColor: "blue", stopOpacity: 1 }} />
+//           <stop offset="100%" style={{ stopColor: "red", stopOpacity: 1 }} />
+//         </linearGradient>
+//       </defs>
+//       <path d="M50,0 L100,100 L0,100 Z" fill="url(#fillGradient)" stroke="url(#strokeGradient)"    strokeWidth="2" />
+//     </svg>
+/**
+ * 
+ * @param node 
+ *"strokes": [
+                    {
+                      "type": "GRADIENT_LINEAR",
+                      "visible": true,
+                      "opacity": 1,
+                      "blendMode": "NORMAL",
+                      "gradientStops": [
+                        {
+                          "color": {
+                            "r": 1,
+                            "g": 0.6823529601097107,
+                            "b": 0,
+                            "a": 1
+                          },
+                          "position": 0.20208294689655304
+                        },
+                        {
+                          "color": {
+                            "r": 0.14000000059604645,
+                            "g": 1,
+                            "b": 0,
+                            "a": 0.9800000190734863
+                          },
+                          "position": 0.644791305065155
+                        },
+                        {
+                          "color": {
+                            "r": 0,
+                            "g": 0.3400000035762787,
+                            "b": 1,
+                            "a": 0.9800000190734863
+                          },
+                          "position": 0.9781246185302734
+                        }
+                      ],
+                      "gradientTransform": [
+                        [
+                          -0.0038815049920231104,
+                          1.3507132530212402,
+                          0.0019407524960115552
+                        ],
+                        [
+                          -1.3507132530212402,
+                          -0.003949007950723171,
+                          1.1753566265106201
+                        ]
+                      ]
+                    }
+                  ],
+ */
+export const buildGradientStroke = (node) => {
+  const arrStroke = []
+
+  node.strokes[0].gradientStops.forEach((strokes) => {
+  const gradientColor = `#${rgbToHex(strokes.color.r)}${rgbToHex(strokes.color.g)}${rgbToHex(strokes.color.b)}`
+  const stroke = {
+     color: gradientColor,
+     stopOpacity: parseFloat((strokes.color.a).toFixed(2)),
+     offset: `${Math.round(strokes.position * 100 * 100) / 100}%`
+   }
+   arrStroke.push(stroke)   
+  })
+  
+  const degs = figmaTransformToCSSAngle(node.strokes[0].gradientTransform)
+  
+  return { strokes: {data:arrStroke, deg: degs,type: node.strokes[0].type}}
+  
+}
+
+export const buildGradientFills = (node) => {
+  const arrFill = []
+  
+  node.fills[0].gradientStops.forEach((fills) => {
+    const gradientColor = `#${rgbToHex(fills.color.r)}${rgbToHex(fills.color.g)}${rgbToHex(fills.color.b)}`
+    const fill = {
+      color: gradientColor,
+      stopOpacity: parseFloat((fills.color.a).toFixed(2)),
+      offset: `${Math.round(fills.position * 100 * 100) / 100}%`
+     }
+     arrFill.push(fill)
+  })
+  const degs = figmaTransformToCSSAngle(node.fills[0].gradientTransform)
+
+      
+  return { fill:{ data:arrFill, deg:degs, type:node.fills[0].type}}  
+}
+
+
 /**
  * STYLES TEXT
  * @param style
