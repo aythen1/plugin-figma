@@ -516,38 +516,42 @@ export const convertFigmaGradientToString = (node) => {
 export const buildGradientStroke = (node) => {
   const arrStroke = []
 
-  node.strokes[0].gradientStops.forEach((strokes) => {
-  const gradientColor = `#${rgbToHex(strokes.color.r)}${rgbToHex(strokes.color.g)}${rgbToHex(strokes.color.b)}`
-  const stroke = {
-     color: gradientColor,
-     stopOpacity: parseFloat((strokes.color.a).toFixed(2)),
-     offset: `${Math.round(strokes.position * 100 * 100) / 100}%`
-   }
-   arrStroke.push(stroke)   
-  })
-  
-  const degs = figmaTransformToCSSAngle(node.strokes[0].gradientTransform)
-  
-  return { strokes: {data:arrStroke, deg: degs,type: node.strokes[0].type}}
-  
+  if (node.strokes[0].type === "GRADIENT_LINEAR" ) {
+    node.strokes[0].gradientStops.forEach((strokes) => {
+      const gradientColor = `#${rgbToHex(strokes.color.r)}${rgbToHex(strokes.color.g)}${rgbToHex(strokes.color.b)}`
+      const stroke = {
+        color: gradientColor,
+        stopOpacity: parseFloat((strokes.color.a).toFixed(2)),
+        offset: `${Math.round(strokes.position * 100 * 100) / 100}%`
+      }
+      arrStroke.push(stroke)   
+    })
+    
+    const degs = transformToCSSAngle(node.strokes[0].gradientTransform)
+    
+    return { data:arrStroke, deg: degs, type:node.strokes[0].type}
+  }
+  return null  
 }
 
 export const buildGradientFills = (node) => {
   const arrFill = []
-  
-  node.fills[0].gradientStops.forEach((fills) => {
-    const gradientColor = `#${rgbToHex(fills.color.r)}${rgbToHex(fills.color.g)}${rgbToHex(fills.color.b)}`
-    const fill = {
-      color: gradientColor,
-      stopOpacity: parseFloat((fills.color.a).toFixed(2)),
-      offset: `${Math.round(fills.position * 100 * 100) / 100}%`
-     }
-     arrFill.push(fill)
-  })
-  const degs = figmaTransformToCSSAngle(node.fills[0].gradientTransform)
 
+  if (node.strokes[0].type === "GRADIENT_LINEAR") {
+    node.fills[0].gradientStops.forEach((fills) => {
+      const gradientColor = `#${rgbToHex(fills.color.r)}${rgbToHex(fills.color.g)}${rgbToHex(fills.color.b)}`
+      const fill = {
+        color: gradientColor,
+        stopOpacity: parseFloat((fills.color.a).toFixed(2)),
+        offset: `${(Math.round(fills.position * 100 * 100) / 100) + 10}%`
+      }
+      arrFill.push(fill)
+    })
+    const degs = transformToCSSAngle(node.fills[0].gradientTransform)
       
-  return { fill:{ data:arrFill, deg:degs, type:node.fills[0].type}}  
+    return { data: arrFill, deg: degs, type: node.fills[0].type }
+  }
+  return null
 }
 
 
