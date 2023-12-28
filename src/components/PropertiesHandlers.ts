@@ -30,8 +30,6 @@ export const updateProperties = (data, originalX = data.Property.grid.x, origina
     }
 }
 
-
-
 export const modifyZIndex = (node, zIndex = 0 ) => {
   // Actualiza el zIndex del objeto actual
   node.Property.style.desktop.attribute.zIndex = zIndex;
@@ -230,7 +228,6 @@ export const getTextColor = (node) => {
   return "transparent";
 }
 
-
 // export async function getImages(node) {
 //   if (node.fills && node.fills[0]) {
 //   const image = node.fills[0]
@@ -251,7 +248,8 @@ export const getTextColor = (node) => {
 
 export async function getImages(node) {
   if (node.fills && node.fills.length > 0) {
-     const image = node.fills.map(async (fill) => {
+    const image = node.fills.map(async (fill) => {
+      if (fill.visible === false) return null
       if (fill.type === "IMAGE") {
         const imageConvert = figma.getImageByHash(fill.imageHash);
         const imageEncode = await imageConvert.getBytesAsync();
@@ -394,6 +392,7 @@ const getDegreesForMatrix = (matrix) => {
 }
 
 export const convertBorderGradient = (node) => {  
+    if (node.fills[0].visible === false) return null
     const paint = node.fills.find(item => item.type === 'GRADIENT_LINEAR' || item.type === 'GRADIENT_ANGULAR' || item.type === 'GRADIENT_RADIAL' || item.type === 'GRADIENT_DIAMOND');
     if (!paint || paint === "undefined") return null
   
@@ -416,6 +415,7 @@ export const convertBorderGradient = (node) => {
 }
 
 export const convertFigmaGradientToString = (node) => {  
+    if (node.fills[0].visible === false) return null
     const paint = node.fills.find(item => item.type === 'GRADIENT_LINEAR' || item.type === 'GRADIENT_ANGULAR' || item.type === 'GRADIENT_RADIAL' || item.type === 'GRADIENT_DIAMOND');
     if (!paint || paint === "undefined") return null
   
@@ -442,24 +442,6 @@ export const convertFigmaGradientToString = (node) => {
     }  
 }
 
-// <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
-//       <defs>
-//         {/* Gradiente para el relleno (fondo) /}
-//         <linearGradient id="fillGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-//           <stop offset="0%" style={{ stopColor: "red", stopOpacity: 1 }} />
-//           <stop offset="50%" style={{ stopColor: "blue", stopOpacity: 1 }} />
-//           <stop offset="100%" style={{ stopColor: "green", stopOpacity: 1 }} />
-//         </linearGradient>
-
-//         {/ Gradiente para los bordes */}
-//         <linearGradient id="strokeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-//           <stop offset="0%" style={{ stopColor: "green", stopOpacity: 1 }} />
-//           <stop offset="50%" style={{ stopColor: "blue", stopOpacity: 1 }} />
-//           <stop offset="100%" style={{ stopColor: "red", stopOpacity: 1 }} />
-//         </linearGradient>
-//       </defs>
-//       <path d="M50,0 L100,100 L0,100 Z" fill="url(#fillGradient)" stroke="url(#strokeGradient)"    strokeWidth="2" />
-//     </svg>
 /**
  * 
  * @param node 
@@ -537,7 +519,8 @@ export const buildGradientStroke = (node) => {
 export const buildGradientFills = (node) => {
   const arrFill = []
 
-  if (node.strokes[0].type === "GRADIENT_LINEAR") {
+  if (node.fills[0].visible === false) return null
+  if (node.strokes[0].type === "GRADIENT_LINEAR" || "GRADIENT_RADIAL" || "GRADIENT_ANGULAR" || "GRADIENT_DIAMOND") {
     node.fills[0].gradientStops.forEach((fills) => {
       const gradientColor = `#${rgbToHex(fills.color.r)}${rgbToHex(fills.color.g)}${rgbToHex(fills.color.b)}`
       const fill = {
@@ -551,9 +534,9 @@ export const buildGradientFills = (node) => {
       
     return { data: arrFill, deg: degs, type: node.fills[0].type }
   }
+  
   return null
 }
-
 
 /**
  * STYLES TEXT
@@ -618,6 +601,7 @@ export const buildTextcase = (textCase) => {
    * backdrop-filter: blur(2px); <-- BACKGROUND_BLUR
   */ 
 export const buildEffects = (node) => {
+  if (node.effects[0].visible === false) return null
   const { type, offset, radius, spread, color } = node.effects[0]
   if(!node.effects[0] || Object.keys(node.effects[0]).length == 0 || !type) return null
   if (type === 'DROP_SHADOW') {
@@ -638,7 +622,8 @@ export const buildEffects = (node) => {
  * Border
  * border: 1px solid #000;
  */  
-export const buildStrokes = ( node ) => {
+export const buildStrokes = (node) => {
+  if (node.strokes[0].visible === false) return null  
   const { type, color, opacity } = node.strokes[0]
   if(!type) return null
   const colors = makeHex(color.r, color.g, color.b) 
@@ -647,33 +632,8 @@ export const buildStrokes = ( node ) => {
   }
 }
 
-// const variable = {
-//   position: 'relative',
-//   width: '500px',
-//   height: '500px',
-//   color: 'red',
-//   display: 'flex',
-//   justifyContent: 'center',
-//   alignItems: 'center',
-//   backgroundColor: 'white',
-//   borderRadius:' 50%', 
-//   "&::before": {
-//     content: "",
-//     position: 'absolute',
-//     inset: '0',
-//     borderRadius: '50%', 
-//     padding: '10px', 
-//     background:`linear-gradient(45deg,rgb(17, 1, 236),rgb(255, 123, 0))`, 
-//     WebkitMask: `linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)`,
-//     WebkitMaskComposite: 'xor',
-//     markComposite: 'exclude',
-//   }
-
 export const buildStrokesBorderGradient = (node) => {
-  
-  // const paint = node.strokes[0].find(item => item.type === 'GRADIENT_LINEAR' || item.type === 'GRADIENT_ANGULAR' || item.type === 'GRADIENT_RADIAL' || item.type === 'GRADIENT_DIAMOND');
- 
-  // console.log(paint, 'esto es el paint')
+  if (node.strokes[0].visible === false) return null    
   if (node.strokes[0].type) {    
     const { gradientTransform, gradientStops } = node.strokes[0];
     const gradientStopsString = gradientStops
@@ -699,8 +659,8 @@ export const buildStrokesBorderGradient = (node) => {
 } return null
 }
 
-
-export const buildStrokestop = ( node ) => {
+export const buildStrokestop = (node) => {
+  if (node.strokes[0].visible === false) return null  
   const { type, color, opacity } = node.strokes[0]
   if(!type) return null
   const colors = makeHex(color.r, color.g, color.b) 
@@ -709,7 +669,8 @@ export const buildStrokestop = ( node ) => {
   }
 }
 
-export const buildStrokesbottom = ( node ) => {
+export const buildStrokesbottom = (node) => {
+  if (node.strokes[0].visible === false) return null  
   const { type, color, opacity } = node.strokes[0]
   if(!type) return null
   const colors = makeHex(color.r, color.g, color.b) 
@@ -718,7 +679,8 @@ export const buildStrokesbottom = ( node ) => {
   }
 }
 
-export const buildStrokesleft = ( node ) => {
+export const buildStrokesleft = (node) => {
+  if (node.strokes[0].visible === false) return null  
   const { type, color, opacity } = node.strokes[0]
   if(!type) return null
   const colors = makeHex(color.r, color.g, color.b) 
@@ -727,7 +689,8 @@ export const buildStrokesleft = ( node ) => {
   }
 }
 
-export const buildStrokesright = ( node ) => {
+export const buildStrokesright = (node) => {
+  if (node.strokes[0].visible === false) return null
   const { type, color, opacity } = node.strokes[0]
   if(!type) return null
   const colors = makeHex(color.r, color.g, color.b) 
@@ -753,7 +716,6 @@ export const getMaskType  = (node) => {
   }
   return null;
 };
-
 
 /**
  * fillGeometry --> clip-path

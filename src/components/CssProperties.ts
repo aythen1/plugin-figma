@@ -29,7 +29,6 @@ import {
   buildGradientStroke,
   getImages,
   buildGradientFills,
-
 } from './PropertiesHandlers';
 
 const specialProperties = {
