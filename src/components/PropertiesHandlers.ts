@@ -196,7 +196,8 @@ export const getCounterAxisAlignItems = (node) => {
  */ 
 export const getBackgroundColor = (node) => {
    if (node.type !== 'TEXT' &&  node.type === "RECTANGLE" || node.type === "FRAME" || node.type === 'INSTANCE' || node.type === 'COMPONENT' || node.type === 'GROUP' && node.fills.length > 0) {
-    const fill = node.fills[0];
+     const fill = node.fills[0];
+     if(fill.visible === false) return null
      if (fill && fill.type === 'SOLID') {
        const { r, g, b } = fill.color;
        const { opacity } = fill;

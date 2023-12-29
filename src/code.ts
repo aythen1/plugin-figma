@@ -73,12 +73,10 @@ let getComponentType = (type) => {
   }
 }
 
-
-
 let id = 1
 let createComponent =  async (node) => {
   const componentType = getComponentType(node.type);
-  const hasChildren = node.type === 'GROUP' || node.type === 'FRAME' || node.type === 'INSTANCE' || node.type === 'COMPONENT';
+  const hasChildren = node.type === 'GROUP' || node.type === 'FRAME' || node.type === 'INSTANCE' || node.type === 'COMPONENT' || node.type === 'COMPONENT_SET';
   const componentName = (node.name).substring(0, 24);
   const cssProperties = fnNativeAttributes(node);
   const position = getAbsolutePosition(node);
