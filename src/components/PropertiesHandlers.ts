@@ -248,21 +248,21 @@ export const getTextColor = (node) => {
 
 export async function getImages(node) {
   if (node.fills && node.fills.length > 0) {
-    const image = node.fills.map(async (fill) => {
-      if (fill.visible === false) return null
-      if (fill.type === "IMAGE") {
-        const imageConvert = figma.getImageByHash(fill.imageHash);
-        const imageEncode = await imageConvert.getBytesAsync();
-        const imgArray = Object.values(imageEncode);
-
-        return {
-          image: imgArray,
-          src: ""
-        };
-      }
-      return null;
-     });
+    const image = await Promise.all( node.fills.map(async (fill) => {
+        if (fill.visible === false) return null
+        if (fill.type === "IMAGE") {
+          const imageConvert = figma.getImageByHash(fill.imageHash);
+          const imageEncode = await imageConvert.getBytesAsync();
+          const imgArray = Object.values(imageEncode);
+          return {
+            image: imgArray,
+            src: ""
+          };
+        }
+        return null;
+      }))
     const resp = image.filter(img => img !== null)
+ 
     return resp[0]
   } 
   return null;
@@ -659,11 +659,17 @@ export const buildStrokesBorderGradient = (node) => {
 } return null
 }
 
+
+// background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='%23268600' stroke-width='4' stroke-dasharray='50%2c 50' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
+
 export const buildStrokestop = (node) => {
   if (node.strokes[0].visible === false) return null  
   const { type, color, opacity } = node.strokes[0]
   if(!type) return null
   const colors = makeHex(color.r, color.g, color.b) 
+  if (node.dashPattern.length > 0) {
+    return `${node.strokeTopWeight}px dashed ${colors}`
+  }
   if (type === 'SOLID') {
     return `${node.strokeTopWeight}px solid ${colors}`
   }
@@ -674,6 +680,9 @@ export const buildStrokesbottom = (node) => {
   const { type, color, opacity } = node.strokes[0]
   if(!type) return null
   const colors = makeHex(color.r, color.g, color.b) 
+  if (node.dashPattern.length > 0) {
+    return `${node.strokeTopWeight}px dashed ${colors}`
+  }
   if (type === 'SOLID') {
     return `${node.strokeBottomWeight}px solid ${colors}`
   }
@@ -684,6 +693,9 @@ export const buildStrokesleft = (node) => {
   const { type, color, opacity } = node.strokes[0]
   if(!type) return null
   const colors = makeHex(color.r, color.g, color.b) 
+  if (node.dashPattern.length > 0) {
+    return `${node.strokeTopWeight}px dashed ${colors}`
+  }
   if (type === 'SOLID') {
     return `${node.strokeLeftWeight}px solid ${colors}`
   }
@@ -694,6 +706,9 @@ export const buildStrokesright = (node) => {
   const { type, color, opacity } = node.strokes[0]
   if(!type) return null
   const colors = makeHex(color.r, color.g, color.b) 
+  if (node.dashPattern.length > 0) {
+    return `${node.strokeTopWeight}px dashed ${colors}`
+  }
   if (type === 'SOLID') {
     return `${node.strokeRightWeight}px solid ${colors}`
   }

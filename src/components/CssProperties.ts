@@ -63,8 +63,10 @@ const specialProperties = {
     "-webkitBackgroundClip": node.type === "TEXT" ? "text" : null,
     "-webkitTextFillColor": buildWebkitText(node),
     borderImage: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? convertBorderGradient(node) : null,
-    // backgroundImage: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? getImages(node) : null,
   }),
+  // removed: async (node) => ({
+  //   backgroundImage: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? await getImages(node) : null,
+  // }),
   blendMode: (node) => ({
     gradientStroke: !node.strokes || Object.keys(node.strokes).length == 0 ? null: buildGradientStroke(node)
   }),
@@ -147,11 +149,12 @@ export const fnNativeAttributes = (node) => {
   const allPropertyNames = [
     // "currentPage",
     // "name",
-    // "description",
     // "x",
     // "y",
     // "parent",
     // "onmessage",
+    // "description",
+      "removed",
       "type",
       "blendMode", 
       "id",
@@ -210,7 +213,8 @@ export const fnNativeAttributes = (node) => {
       "letterSpacing",
       "scaleFactor",
       "paragraphIndent",
-      "paragraphSpacing",     
+      "paragraphSpacing",
+      "dashPattern"     
   ];
   
     const data = {};
