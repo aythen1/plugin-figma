@@ -76,7 +76,7 @@ let getComponentType = (type) => {
 let id = 1
 let createComponent =  async (node) => {
   const componentType = getComponentType(node.type);
-  const hasChildren = node.type === 'GROUP' || node.type === 'FRAME' || node.type === 'INSTANCE' || node.type === 'COMPONENT' || node.type === 'COMPONENT_SET';
+  const hasChildren = node.type === 'GROUP' || node.type === 'FRAME' || node.type === 'INSTANCE' || node.type === 'COMPONENT' || node.type === 'COMPONENT_SET' || node.type === 'BOOLEAN_OPERATION';
   const componentName = (node.name).substring(0, 24);
   const cssProperties = fnNativeAttributes(node);
   const position = getAbsolutePosition(node);

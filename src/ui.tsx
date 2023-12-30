@@ -24,7 +24,7 @@ function App() {
     try {
 
 
-      const jsonGenerationTime = 8000;
+      const jsonGenerationTime = 30000;
 
       const endTime = startTime + jsonGenerationTime;
 
