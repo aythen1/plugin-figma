@@ -105,6 +105,9 @@ const specialProperties = {
     fontFamily: node.fontName ? node.fontName.family : null,
     fontWeight: node.fontName ? buildFontStyle(node.fontName.style) : null,
   }),
+  fontSize: (node) => ({
+    fontSize: node.fontSize ? `${node.fontSize}px` : null
+  }),
   lineHeight: (node) => ({
     lineHeight: node.lineHeight ? buildLineheight(node.lineHeight) : null
   }),
@@ -154,7 +157,10 @@ export const fnNativeAttributes = (node) => {
     // "parent",
     // "onmessage",
     // "description",
-      "removed",
+    // "dashPattern"     
+    // "removed",
+      "inferredAutoLayout",
+      "absoluteBoundingBox",
       "type",
       "blendMode", 
       "id",
@@ -213,8 +219,7 @@ export const fnNativeAttributes = (node) => {
       "letterSpacing",
       "scaleFactor",
       "paragraphIndent",
-      "paragraphSpacing",
-      "dashPattern"     
+      "paragraphSpacing"
   ];
   
     const data = {};

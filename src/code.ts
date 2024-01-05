@@ -1,5 +1,5 @@
 import { fnNativeAttributes } from './components/CssProperties';
-import { getAbsolutePosition, getImages, changeVisibility, updateZIndex, updateProperties } from './components/PropertiesHandlers';
+import { getAbsolutePosition, getImages, changeVisibility, updateZIndex, updateProperties, deleteProperties } from './components/PropertiesHandlers';
 
 let templateComponent = {
   "tag": "span",
@@ -79,6 +79,7 @@ let createComponent =  async (node) => {
   const hasChildren = node.type === 'GROUP' || node.type === 'FRAME' || node.type === 'INSTANCE' || node.type === 'COMPONENT' || node.type === 'COMPONENT_SET' || node.type === 'BOOLEAN_OPERATION';
   const componentName = (node.name).substring(0, 24);
   const cssProperties = fnNativeAttributes(node);
+  const PropertiesCss = deleteProperties(cssProperties)
   const position = getAbsolutePosition(node);
   const imageEncode = await getImages(node);
   
@@ -118,7 +119,7 @@ let createComponent =  async (node) => {
         desktop: {
           width: "1920",
           active: true,
-          attribute: cssProperties,
+          attribute: PropertiesCss,
         },
         mobileLandscape: {
           width: "767",
@@ -160,10 +161,10 @@ let createComponent =  async (node) => {
     for (let i = 0; i < childComponents.length; i += chunkSize) {
       const chunk = childComponents.slice(i, i + chunkSize);
     
-    childChunks.push(childComponents);
+    childChunks.unshift(childComponents);
     }   
     for (const chunk of childChunks) {
-      tree.children.push(...chunk);
+      tree.children.unshift(...chunk);
       await new Promise((resolve) => setTimeout(resolve, 0)); 
     }
   }

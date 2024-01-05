@@ -1,3 +1,12 @@
+export const deleteProperties = (props) => {
+    for (var key in props) {
+        if (props[key] === null) {
+            delete props[key];
+        }
+    }
+    return props;
+}
+
 export const updateZIndex = (node, zIndex = 0) => {
   // Actualiza el zIndex del objeto actual
   node.Property.style.desktop.attribute.zIndex = zIndex;
