@@ -18,31 +18,37 @@ let templateComponent = {
     "style": {
       "wide": {
         "width": "1600",
+        "position": "absolute",
         "active": true,
         "attribute": {}
       },
       "laptop": {
         "width": "1200",
+        "position": "absolute",
         "active": true,
         "attribute": {}
       },
       "mobile": {
         "width": "479",
+        "position": "absolute",
         "active": true,
         "attribute": {}
       },
       "tablet": {
         "width": "991",
+        "position": "absolute",
         "active": true,
         "attribute": {}
       },
       "desktop": {
         "width": "1920",
+        "position": "absolute",
         "active": true,
         "attribute":[], 
       },
       "mobileLandscape": {
         "width": "767",
+        "position": "absolute",
         "active": true,
         "attribute": {}
       }
@@ -50,8 +56,14 @@ let templateComponent = {
     "grid": {
       "height": "",
       "width": "",
-      "x": "",
-      "y": ""
+      "positionAbsolute": {
+          "x": 0,
+          "y": 0,
+        },
+        "positionRelative": {
+          "x": 0,
+          "y": 0,
+        }
     },
     "event": "",
     "state": {},
@@ -98,31 +110,37 @@ let createComponent =  async (node) => {
       style: {
         wide: {
           width: "1600",
+          position: "absolute",
           active: true,
           attribute: {}
         },
         laptop: {
           width: "1200",
+          position: "absolute",
           active: true,
           attribute: {}
         },
         mobile: {
           width: "479",
+          position: "absolute",
           active: true,
           attribute: {}
         },
         tablet: {
           width: "991",
+          position: "absolute",
           active: true,
           attribute: {}
         },
         desktop: {
           width: "1920",
+          position: "absolute",
           active: true,
           attribute: PropertiesCss,
         },
         mobileLandscape: {
           width: "767",
+          position: "absolute", // node.layoutPositioning === "ABSOLUTE" ? "absolute" :node.layoutPositioning === "AUTO" ? "relative" : "static"
           active: true,
           attribute: {}
         }
@@ -130,8 +148,14 @@ let createComponent =  async (node) => {
       grid: {
         height: node.height === 0 ? 1 : node.height,
         width: node.width === 0 ? 1 : node.width,
-        x: position.x,
-        y: position.y,
+        positionAbsolute: {
+          x: position.x,
+          y: position.y,
+        },
+        positionRelative: {
+          x: 0,
+          y: 0,
+        }
       },
       event: "",
       state: {},

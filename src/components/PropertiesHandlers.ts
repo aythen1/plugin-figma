@@ -23,17 +23,17 @@ export const updateZIndex = (node, zIndex = 0) => {
   }
 }
 
-export const updateProperties = (data, originalX = data.Property.grid.x, originalY = data.Property.grid.y) => {
+export const updateProperties = (data, originalX = data.Property.grid.positionAbsolute.x, originalY = data.Property.grid.positionAbsolute.y) => {
     if (data.figmaId === 1) {
-        originalX = data.Property.grid.x;
-        originalY = data.Property.grid.y;
-        data.Property.grid.x = 0;
-        data.Property.grid.y = 0;
+        originalX = data.Property.grid.positionAbsolute.x;
+        originalY = data.Property.grid.positionAbsolute.y;
+        data.Property.grid.positionAbsolute.x = 0;
+        data.Property.grid.positionAbsolute.y = 0;
     }
     if (data.hasChildren) {
         data.children.forEach(child => {
-            child.Property.grid.x -= originalX;
-            child.Property.grid.y -= originalY;
+            child.Property.grid.positionAbsolute.x -= originalX;
+            child.Property.grid.positionAbsolute.y -= originalY;
             updateProperties(child, originalX, originalY);
         });
     }
@@ -114,7 +114,7 @@ export const isGroupNode = (node: unknown): node is GroupNode =>
   
 
 export const getDisplay = (node) => {
-  if (!node.layoutGrids) return "flex"
+  if (node.inferredAutoLayout.layoutMode) return "flex"
   if (node.layoutGrids && node.layoutGrids[0].length > 0) return "grid"
 }
 
@@ -183,16 +183,16 @@ export const getPrimaryAxisAlignItems = (node) => {
       ‘BASELINE’ en Figma puede corresponder a ‘baseline’ en CSS.
  */
 export const getCounterAxisAlignItems = (node) => {
-  if (node.primaryAxisAlignItems === "MIN") {
+  if (node.counterAxisAlignItems === "MIN") {
     return "flex-start";
   }
-  if (node.primaryAxisAlignItems === "MAX") {
+  if (node.counterAxisAlignItems === "MAX") {
     return "flex-end";
   }
-  if (node.primaryAxisAlignItems === "CENTER") {
+  if (node.counterAxisAlignItems === "CENTER") {
     return "center";
   }
-  if (node.primaryAxisAlignItems === "BASELINE") {
+  if (node.counterAxisAlignItems === "BASELINE") {
     return "baseline";
   }
   return null;
