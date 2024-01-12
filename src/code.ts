@@ -4,7 +4,8 @@ import { getAbsolutePosition, getImages, changeVisibility, updateZIndex, updateP
 let templateComponent = {
   "tag": "span",
   "name": "span",
-  "tagName": "" ,
+  "tagName": "",
+  "rol": "default",
   "attributes": {},
   "image": [],
   "src":"",
@@ -98,6 +99,7 @@ let createComponent =  async (node) => {
   let tree = {
     ...templateComponent,
     figmaId: id++,
+    rol: hasChildren ? "container" : "default",
     tag: componentType,
     name: componentName,
     tagName: componentType,
@@ -110,37 +112,37 @@ let createComponent =  async (node) => {
       style: {
         wide: {
           width: "1600",
-          position: "absolute",
+          position: node.layoutPositioning === "ABSOLUTE" ? "absolute" : "static",
           active: true,
           attribute: {}
         },
         laptop: {
           width: "1200",
-          position: "absolute",
+          position: node.layoutPositioning === "ABSOLUTE" ? "absolute" : "static",
           active: true,
           attribute: {}
         },
         mobile: {
           width: "479",
-          position: "absolute",
+          position: node.layoutPositioning === "ABSOLUTE" ? "absolute" : "static",
           active: true,
           attribute: {}
         },
         tablet: {
           width: "991",
-          position: "absolute",
+          position: node.layoutPositioning === "ABSOLUTE" ? "absolute" : "static",
           active: true,
           attribute: {}
         },
         desktop: {
           width: "1920",
-          position: "absolute",
+          position: node.layoutPositioning === "ABSOLUTE" ? "absolute" : "static",
           active: true,
           attribute: PropertiesCss,
         },
         mobileLandscape: {
           width: "767",
-          position: "absolute", // node.layoutPositioning === "ABSOLUTE" ? "absolute" :node.layoutPositioning === "AUTO" ? "relative" : "static"
+          position: node.layoutPositioning === "ABSOLUTE" ? "absolute" : "static", 
           active: true,
           attribute: {}
         }

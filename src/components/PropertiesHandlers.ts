@@ -24,7 +24,8 @@ export const updateZIndex = (node, zIndex = 0) => {
 }
 
 export const updateProperties = (data, originalX = data.Property.grid.positionAbsolute.x, originalY = data.Property.grid.positionAbsolute.y) => {
-    if (data.figmaId === 1) {
+  if (data.figmaId === 1) {
+      data.Property.style.desktop.position = "relative"
         originalX = data.Property.grid.positionAbsolute.x;
         originalY = data.Property.grid.positionAbsolute.y;
         data.Property.grid.positionAbsolute.x = 0;
