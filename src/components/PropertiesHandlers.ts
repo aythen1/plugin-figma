@@ -58,11 +58,11 @@ export const modifyZIndex = (node, zIndex = 0 ) => {
 
 export const changeVisibility = (node) => {
   // Si el nodo no es visible, establece todos sus hijos como no visibles y 'isShow' en false
-  if (node.Property?.style?.desktop?.attribute?.visible === false ) {
+  if (node.Property?.style?.desktop?.attribute?.visibility === "hidden" ) {
     node.isShow = false;
     if (node.hasChildren) {
       node.children.forEach(child => {
-        child.Property.style.desktop.attribute.visible = false;
+        child.Property.style.desktop.attribute.visibility = "hidden";
         child.isShow = false;
         changeVisibility(child);
       });      

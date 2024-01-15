@@ -34,6 +34,9 @@ const specialProperties = {
   parent: () => ({
     zIndex: 0
   }),
+  visible: (node) => ({
+    visibility: node.visible ? "visible" : "hidden"
+  }),
   layoutGrids: (node) => ({
     display: getDisplay(node)
   }),
@@ -100,27 +103,27 @@ const specialProperties = {
   // paddingTop: (node) => ({
   //   paddingTop: `${node.paddingTop ? node.paddingTop : 0}px`,
   // }),
-  paddingBottom: (node) => ({
-    paddingBottom: `${node.paddingBottom ? node.paddingBottom : 0}px`,
-  }),
-  paddingLeft: (node) => ({
-    paddingLeft: `${node.paddingLeft ? node.paddingLeft : 0}px`,
-  }),
-  paddingRight: (node) => ({
-    paddingRight: `${node.paddingRight ? node.paddingRight : 0}px`,
-  }),
-  topLeftRadius: (node) => ({
-    topLeftRadius: `${node.topLeftRadius ? node.topLeftRadius : 0}px`,
-  }),
-  topRightRadius: (node) => ({
-    topRightRadius: `${node.topRightRadius ? node.topRightRadius : 0}px`,
-  }),
-  bottomLeftRadius:(node) => ({
-    bottomLeftRadius: `${node.bottomLeftRadius ? node.bottomLeftRadius : 0}px`,
-  }),
-  bottomRightRadius:(node) => ({
-    bottomRightRadius: `${node.bottomRightRadius ? node.bottomRightRadius : 0}px`,
-  }),
+  // paddingBottom: (node) => ({
+  //   paddingBottom: `${node.paddingBottom ? node.paddingBottom : 0}px`,
+  // }),
+  // paddingLeft: (node) => ({
+  //   paddingLeft: `${node.paddingLeft ? node.paddingLeft : 0}px`,
+  // }),
+  // paddingRight: (node) => ({
+  //   paddingRight: `${node.paddingRight ? node.paddingRight : 0}px`,
+  // }),
+  // topLeftRadius: (node) => ({
+  //   topLeftRadius: `${node.topLeftRadius ? node.topLeftRadius : 0}px`,
+  // }),
+  // topRightRadius: (node) => ({
+  //   topRightRadius: `${node.topRightRadius ? node.topRightRadius : 0}px`,
+  // }),
+  // bottomLeftRadius:(node) => ({
+  //   bottomLeftRadius: `${node.bottomLeftRadius ? node.bottomLeftRadius : 0}px`,
+  // }),
+  // bottomRightRadius:(node) => ({
+  //   bottomRightRadius: `${node.bottomRightRadius ? node.bottomRightRadius : 0}px`,
+  // }),
   cornerRadius: (node) => ({
     borderRadius: `${node.topLeftRadius ? node.topLeftRadius : 0}px ${node.topRightRadius ? node.topRightRadius : 0}px ${node.bottomRightRadius ? node.bottomRightRadius : 0}px ${node.bottomLeftRadius ? node.bottomLeftRadius : 0}px`,
   }),
@@ -189,8 +192,8 @@ export const fnNativeAttributes = (node) => {
     // "inferredAutoLayout",
     // "counterAxisAlignContent",
     "counterAxisAlignItems",
-    "counterAxisSizingMode",
-    "primaryAxisSizingMode",
+    // "counterAxisSizingMode",
+    // "primaryAxisSizingMode",
     "primaryAxisAlignItems",
     // "relativeTransform",
     // "constraints",
@@ -198,8 +201,8 @@ export const fnNativeAttributes = (node) => {
     "blendMode", 
     "id",
     "visible",
-    "width",
-    "height",
+    // "width",
+    // "height",
     "maxHeight",
     "minHeight",
     "maxWidth",
@@ -208,31 +211,31 @@ export const fnNativeAttributes = (node) => {
     "fontName",
     "rotation",
     "opacity",
-    "paddingRight",
-    "paddingLeft",
-    "paddingBottom",
+    // "paddingRight",
+    // "paddingLeft",
+    // "paddingBottom",
     "paddingTop",
-    "cornerSmoothing",
+    // "cornerSmoothing",
     "cornerRadius",
-    "topRightRadius",
-    "topLeftRadius",
-    "bottomRightRadius",
-    "bottomLeftRadius",  
+    // "topRightRadius",
+    // "topLeftRadius",
+    // "bottomRightRadius",
+    // "bottomLeftRadius",
     "layoutMode",
     "layoutGrow",
-    "layoutAlign",
+    // "layoutAlign",
     "layoutGrids",    
-    "layoutWrap", 
-    "layoutPositioning",
+    "layoutWrap",
+    // "layoutPositioning",
     // "layoutSizingHorizontal",
     // "layoutSizingVertical",
-    "isAsset",
-    "maskType",     
+    // "isAsset",
+    "maskType",
     "effects",
     "fills",
     "strokes",
     "fillGeometry",
-    "strokeAlign",
+    // "strokeAlign",
     "strokeWeight",
     "strokeCap",
     "strokeJoin",
@@ -242,21 +245,21 @@ export const fnNativeAttributes = (node) => {
     "strokeMiterLimit",
     "strokeTopWeight",
     "itemSpacing",
-      // "counterAxisSpacing",
-      // "arcData",
-      // "itemReverseZIndex",
+    // "counterAxisSpacing",
+    // "arcData",
+    // "itemReverseZIndex",
     "selectedTextRange",
     "innerRadius",
     "textAlignHorizontal",
     "textCase",
-    "textAutoResize",
+    // "textAutoResize",
     "textAlignVertical",
     "textDecoration",
     "lineHeight",
     "letterSpacing",
-    "scaleFactor",
-      // "paragraphIndent",
-      // "paragraphSpacing"
+    // "scaleFactor",
+    // "paragraphIndent",
+    // "paragraphSpacing"
   ];
   
     const data = {};
