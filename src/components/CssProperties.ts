@@ -58,6 +58,9 @@ const specialProperties = {
   itemSpacing: (node) => ({
     gap: node.itemSpacing? `${node.itemSpacing}px` : null
   }),
+  removed: (node) => ({
+    gradientFill: Object.keys(node.fills).length === 0 ? null : buildGradientFills(node)
+  }),
   fills: (node) => ({
     background: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? convertFigmaGradientToString(node) : null,
     color: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? getTextColor(node) : null,
@@ -70,10 +73,7 @@ const specialProperties = {
   //   backgroundImage: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? await getImages(node) : null,
   // }),
   blendMode: (node) => ({
-    gradientStroke: !node.strokes || Object.keys(node.strokes).length == 0 ? null: buildGradientStroke(node)
-  }),
-  type: (node) => ({
-    gradientFill: !node.strokes || Object.keys(node.fills).length == 0 ? null: buildGradientFills(node)
+    gradientStroke: !node.strokes || Object.keys(node.strokes).length === 0 ? null: buildGradientStroke(node)
   }),
   strokeTopWeight: (node) => ({
     borderTop: node.strokeTopWeight ? buildStrokestop(node) : null
@@ -97,35 +97,20 @@ const specialProperties = {
   strokeWeight: (node) => ({
     borderWidth: node.strokeWeight ? `${node.strokeWeight}px` : null
   }),
-  paddingTop: (node) => ({
-    padding: `${node.paddingTop ? node.paddingTop : 0}px ${node.paddingRight ? node.paddingRight : 0}px ${node.paddingBottom ? node.paddingBottom : 0}px ${node.paddingLeft ? node.paddingLeft : 0}px`,
-  }),
-  // paddingTop: (node) => ({
-  //   paddingTop: `${node.paddingTop ? node.paddingTop : 0}px`,
-  // }),
-  // paddingBottom: (node) => ({
-  //   paddingBottom: `${node.paddingBottom ? node.paddingBottom : 0}px`,
-  // }),
-  // paddingLeft: (node) => ({
-  //   paddingLeft: `${node.paddingLeft ? node.paddingLeft : 0}px`,
-  // }),
-  // paddingRight: (node) => ({
-  //   paddingRight: `${node.paddingRight ? node.paddingRight : 0}px`,
-  // }),
-  // topLeftRadius: (node) => ({
-  //   topLeftRadius: `${node.topLeftRadius ? node.topLeftRadius : 0}px`,
-  // }),
-  // topRightRadius: (node) => ({
-  //   topRightRadius: `${node.topRightRadius ? node.topRightRadius : 0}px`,
-  // }),
-  // bottomLeftRadius:(node) => ({
-  //   bottomLeftRadius: `${node.bottomLeftRadius ? node.bottomLeftRadius : 0}px`,
-  // }),
-  // bottomRightRadius:(node) => ({
-  //   bottomRightRadius: `${node.bottomRightRadius ? node.bottomRightRadius : 0}px`,
-  // }),
   cornerRadius: (node) => ({
-    borderRadius: `${node.topLeftRadius ? node.topLeftRadius : 0}px ${node.topRightRadius ? node.topRightRadius : 0}px ${node.bottomRightRadius ? node.bottomRightRadius : 0}px ${node.bottomLeftRadius ? node.bottomLeftRadius : 0}px`,
+  borderRadius: node.cornerRadius && node.cornerRadius !== 0 ? node.cornerRadius : null
+  }),
+  topLeftRadius: (node) => ({
+    borderTopLeftRadius: node.topLeftRadius ? node.topLeftRadius : null
+  }),
+  topRightRadius: (node) => ({
+    borderTopRightRadius: node.topRightRadius ? node.topRightRadius : null
+  }),
+  bottomLeftRadius: (node) => ({
+    borderBottomLeftRadius: node.bottomLeftRadius ? node.bottomLeftRadius : null
+  }),
+  bottomRightRadius: (node) => ({
+    borderBottomRightRadius: node.bottomRightRadius ? node.bottomRightRadius : null
   }),
   fontName: (node) => ({
     fontFamily: node.fontName ? node.fontName.family : null,
@@ -158,7 +143,7 @@ const specialProperties = {
     backdropFilter: !node.effects || Object.keys(node.effects).length == 0 ? null : node.effects[0] ? buildEffects(node) : null,
   }),
   rotation: (node) => ({
-    transform: node.rotation ? `rotate(${node.rotation}deg)` : null
+    transform: node.rotation ? (node.rotation * -1) : null
   }),
   strokeMiterLimit: (node) => ({
     strokeMiterlimit: node.strokeMiterLimit ? node.strokeMiterLimit : null
@@ -177,15 +162,15 @@ const specialProperties = {
   })
 };
 
-export const fnNativeAttributes = (node) => {    
+export const fnNativeAttributes = (node) => {
   const allPropertyNames = [
     // "name",
     // "x",
     // "y",
-    // "parent",
+    "parent",
     // "description",
     // "dashPattern"
-    // "removed",
+     "removed",
     // "absoluteTransform",
     // "absoluteBoundingBox",
     // "absoluteRenderBounds",
@@ -197,8 +182,8 @@ export const fnNativeAttributes = (node) => {
     "primaryAxisAlignItems",
     // "relativeTransform",
     // "constraints",
-    "type",
-    "blendMode", 
+    // "type",
+    "blendMode",
     "id",
     "visible",
     // "width",
@@ -211,20 +196,20 @@ export const fnNativeAttributes = (node) => {
     "fontName",
     "rotation",
     "opacity",
-    // "paddingRight",
-    // "paddingLeft",
-    // "paddingBottom",
     "paddingTop",
+    "paddingRight",
+    "paddingLeft",
+    "paddingBottom",
     // "cornerSmoothing",
     "cornerRadius",
-    // "topRightRadius",
-    // "topLeftRadius",
-    // "bottomRightRadius",
-    // "bottomLeftRadius",
+    "topRightRadius",
+    "topLeftRadius",
+    "bottomRightRadius",
+    "bottomLeftRadius",
     "layoutMode",
     "layoutGrow",
     // "layoutAlign",
-    "layoutGrids",    
+    "layoutGrids",
     "layoutWrap",
     // "layoutPositioning",
     // "layoutSizingHorizontal",
@@ -261,9 +246,9 @@ export const fnNativeAttributes = (node) => {
     // "paragraphIndent",
     // "paragraphSpacing"
   ];
-  
+
     const data = {};
-    
+
     for (const propertyName of allPropertyNames) {
       try {
         if (propertyName in node) {
@@ -277,7 +262,6 @@ export const fnNativeAttributes = (node) => {
         console.error(`Error processing property ${propertyName}: ${error}`);
       }
     }
-    
+
     return data;
   };
-  

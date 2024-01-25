@@ -1,5 +1,5 @@
 import { fnNativeAttributes } from './components/CssProperties';
-import { getAbsolutePosition, getImages, changeVisibility, updateZIndex, updateProperties, deleteProperties } from './components/PropertiesHandlers';
+import { getAbsolutePosition, getImages, changeVisibility, updateZIndex, updateProperties, deleteProperties, modifyPosition } from './components/PropertiesHandlers';
 
 let templateComponent = {
   "tag": "span",
@@ -148,15 +148,15 @@ let createComponent =  async (node) => {
         }
       },
       grid: {
-        height: node.height === 0 ? 1 : node.height,
-        width: node.width === 0 ? 1 : node.width,
+        height: node.height, 
+        width: node.width,
         positionAbsolute: {
-          x: position.x,
-          y: position.y,
+          x: node.layoutPositioning === "ABSOLUTE" ? node.absoluteTransform[0][2] : position.x,
+          y: node.layoutPositioning === "ABSOLUTE" ? node.absoluteTransform[1][2] : position.y
         },
         positionRelative: {
-          x: 0,
-          y: 0,
+          x: node.x,
+          y: node.y,
         }
       },
       event: "",
@@ -166,8 +166,7 @@ let createComponent =  async (node) => {
     hasChildren: hasChildren,
     children: []
   };
-  
-    
+
   if ((node.type === 'RECTANGLE' || node.type === 'TEXT' || node.type === 'FRAME' ) && node.fills) {
     tree.tag = imageEncode?.image?.length > 3 ? "img" : componentType
     tree.tagName = tree.image?.image || imageEncode?.image?.length > 3 ?  "img" : componentType
@@ -206,6 +205,7 @@ figma.ui.onmessage = async (msg) => {
       const jsonTree = await createComponent(selectedComponent);
       changeVisibility(jsonTree)
       updateZIndex(jsonTree)
+      modifyPosition(jsonTree)
       updateProperties(jsonTree)
       const jsonText = JSON.stringify(jsonTree, null, 2);
       

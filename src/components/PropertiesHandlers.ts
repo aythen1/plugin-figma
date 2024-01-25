@@ -25,11 +25,11 @@ export const updateZIndex = (node, zIndex = 0) => {
 
 export const updateProperties = (data, originalX = data.Property.grid.positionAbsolute.x, originalY = data.Property.grid.positionAbsolute.y) => {
   if (data.figmaId === 1) {
-      data.Property.style.desktop.position = "relative"
-        originalX = data.Property.grid.positionAbsolute.x;
-        originalY = data.Property.grid.positionAbsolute.y;
-        data.Property.grid.positionAbsolute.x = 0;
-        data.Property.grid.positionAbsolute.y = 0;
+    data.Property.style.desktop.position = "relative"
+    originalX = data.Property.grid.positionAbsolute.x;
+    originalY = data.Property.grid.positionAbsolute.y;
+    data.Property.grid.positionAbsolute.x = 0;
+    data.Property.grid.positionAbsolute.y = 0;
     }
     if (data.hasChildren) {
         data.children.forEach(child => {
@@ -40,20 +40,25 @@ export const updateProperties = (data, originalX = data.Property.grid.positionAb
     }
 }
 
-export const modifyZIndex = (node, zIndex = 0 ) => {
-  // Actualiza el zIndex del objeto actual
-  node.Property.style.desktop.attribute.zIndex = zIndex;
-
-  // Si el objeto tiene hijos, recorre cada uno de ellos
-  if ( node.children.length > 0) {
-    for (let i = 0; i < node.children.length; i++) {
-      // Calcula el nuevo zIndex para el hijo actual
-      const newZIndex = zIndex + node.children.length - i;
-      // Llama a la función recursivamente para cada hijo,
-      // pasando el nuevo zIndex como argumento
-      modifyZIndex(node.children[i], newZIndex);
-    }
+export const modifyPosition = (node) => {
+  // node.Property.style.desktop.position = "relative"
+    if (node.hasChildren && node.children) {
+    node.children.forEach(child => {
+      if (child.Property.style.desktop) {
+        if (child.Property.style.desktop.position !== 'absolute') {
+          if (node.Property.style.desktop.attribute.display === 'flex') {
+            child.Property.style.desktop.position = 'static';
+          } else {
+            child.Property.style.desktop.position = 'fixed';
+            // child.Property.grid.positionAbsolute.x -= originalX;
+            // child.Property.grid.positionAbsolute.y -= originalY;
+          }
+        }
+      }
+      modifyPosition(child);
+    });
   }
+  return node;
 }
 
 export const changeVisibility = (node) => {
@@ -76,6 +81,8 @@ export const changeVisibility = (node) => {
 /**
  * Positions
 */
+
+
 export const getAbsolutePosition = (node) => {
   if (
     typeof node.x !== "number" ||
@@ -95,13 +102,8 @@ export const getAbsolutePosition = (node) => {
   let parent: SceneNode | null = node;
   while ((parent = parent.parent as SceneNode | null)) {
     if (!isGroupNode(parent) && typeof parent.x === "number") {
-      if (node.type === "VECTOR" && node.rotation && node.rotation > 0) {
-        position.x =  position.x + parent.x - 180;
-        position.y = position.y + parent.y - 180;
-      } else {
         position.x += parent.x;
         position.y += parent.y;
-      }
     }
     if (["PAGE", "DOCUMENT"].includes(parent.parent!?.type)) {
       break;
@@ -531,7 +533,8 @@ export const buildGradientFills = (node) => {
   const arrFill = []
 
   if (node.fills[0].visible === false) return null
-  if (node.strokes[0].type === "GRADIENT_LINEAR" || "GRADIENT_RADIAL" || "GRADIENT_ANGULAR" || "GRADIENT_DIAMOND") {
+  if (node.type !== "VECTOR" || node.type === 'ELLIPSE' || node.type === 'STAR' || node.type === "POLYGON") return null
+  if (node.fills[0].type === "GRADIENT_LINEAR" || "GRADIENT_RADIAL" || "GRADIENT_ANGULAR" || "GRADIENT_DIAMOND") {
     node.fills[0].gradientStops.forEach((fills) => {
       const gradientColor = `#${rgbToHex(fills.color.r)}${rgbToHex(fills.color.g)}${rgbToHex(fills.color.b)}`
       const fill = {
