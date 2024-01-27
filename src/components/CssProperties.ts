@@ -37,6 +37,12 @@ const specialProperties = {
   visible: (node) => ({
     visibility: node.visible ? "visible" : "hidden"
   }),
+  clipsContent: (node) => ({
+    overflow: node.clipsContent === true ? "hidden" : null
+  }),
+  opacity: (node) => ({
+    opacity: node.opacity ? node.opacity * 100 : null
+  }),  
   layoutGrids: (node) => ({
     display: getDisplay(node)
   }),
@@ -143,7 +149,7 @@ const specialProperties = {
     backdropFilter: !node.effects || Object.keys(node.effects).length == 0 ? null : node.effects[0] ? buildEffects(node) : null,
   }),
   rotation: (node) => ({
-    transform: node.rotation ? (node.rotation * -1) : null
+    rotation: node.rotation ? (node.rotation * -1) : null
   }),
   strokeMiterLimit: (node) => ({
     strokeMiterlimit: node.strokeMiterLimit ? node.strokeMiterLimit : null
@@ -164,6 +170,7 @@ const specialProperties = {
 
 export const fnNativeAttributes = (node) => {
   const allPropertyNames = [
+    "id",
     // "name",
     // "x",
     // "y",
@@ -184,7 +191,8 @@ export const fnNativeAttributes = (node) => {
     // "constraints",
     // "type",
     "blendMode",
-    "id",
+    // "backgrounds"
+    "clipsContent",
     "visible",
     // "width",
     // "height",

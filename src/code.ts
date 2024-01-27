@@ -18,7 +18,7 @@ let templateComponent = {
   "Property": {
     "style": {
       "wide": {
-        "width": "1600",
+        "width": "1920",
         "position": "absolute",
         "active": true,
         "attribute": {}
@@ -42,7 +42,7 @@ let templateComponent = {
         "attribute": {}
       },
       "desktop": {
-        "width": "1920",
+        "width": "1600",
         "position": "absolute",
         "active": true,
         "attribute":[], 
@@ -111,40 +111,40 @@ let createComponent =  async (node) => {
     Property: {
       style: {
         wide: {
-          width: "1600",
+          width: "1920",
           position: node.layoutPositioning === "ABSOLUTE" ? "absolute" : "static",
           active: true,
-          attribute: {}
+          attribute: {} // node.width > 1919 ? PropertiesCss: {},
         },
         laptop: {
           width: "1200",
           position: node.layoutPositioning === "ABSOLUTE" ? "absolute" : "static",
           active: true,
-          attribute: {}
+          attribute: {} // node.width > 991 && node.width < 1200 ? PropertiesCss: {},
         },
         mobile: {
           width: "479",
           position: node.layoutPositioning === "ABSOLUTE" ? "absolute" : "static",
           active: true,
-          attribute: {}
+          attribute: PropertiesCss
         },
         tablet: {
           width: "991",
           position: node.layoutPositioning === "ABSOLUTE" ? "absolute" : "static",
           active: true,
-          attribute: {}
+          attribute: {} // node.width > 767 && node.width < 991 ? PropertiesCss: {},
         },
         desktop: {
-          width: "1920",
+          width: "1600",
           position: node.layoutPositioning === "ABSOLUTE" ? "absolute" : "static",
           active: true,
-          attribute: PropertiesCss,
+          attribute: {}, // PropertiesCss // node.width > 1200 && node.width < 1600 ? PropertiesCss: {},
         },
         mobileLandscape: {
           width: "767",
           position: node.layoutPositioning === "ABSOLUTE" ? "absolute" : "static", 
           active: true,
-          attribute: {}
+          attribute: {} // node.width > 1 && node.width < 767 ? PropertiesCss: {},
         }
       },
       grid: {
