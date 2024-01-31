@@ -28,6 +28,7 @@ import {
   buildStrokesBorderGradient,
   buildGradientStroke,
   buildGradientFills,
+  buildRotation,
 } from './PropertiesHandlers';
 
 const specialProperties = {
@@ -47,13 +48,13 @@ const specialProperties = {
     display: getDisplay(node)
   }),
   layoutMode: (node) => ({
-    flexDirection: node.layoutMode ? getLayoutMode(node) : null
+    flexDirection: node.inferredAutoLayout.layoutMode ? getLayoutMode(node) : null
   }),
   primaryAxisAlignItems: (node) => ({
-    justifyContent: node. primaryAxisAlignItems ? getPrimaryAxisAlignItems(node) : null
+    justifyContent: node.inferredAutoLayout.primaryAxisAlignItems ? getPrimaryAxisAlignItems(node) : null
   }),
   counterAxisAlignItems: (node) => ({
-    alignItems: node.counterAxisAlignItems ? getCounterAxisAlignItems(node) : null
+    alignItems: node.inferredAutoLayout.counterAxisAlignItems ? getCounterAxisAlignItems(node) : null
   }),
   layoutWrap: (node) => ({
     flexWrap: node.flexWrap ? node.flexWrap.toLowerCase() : null
@@ -62,7 +63,7 @@ const specialProperties = {
     flexGrow: node.layoutGrow? node.layoutGrow : null
   }),
   itemSpacing: (node) => ({
-    gap: node.itemSpacing? `${node.itemSpacing}px` : null
+    gap: node.itemSpacing || node.inferredAutoLayout.itemSpacing  ? node.inferredAutoLayout.itemSpacing : null
   }),
   removed: (node) => ({
     gradientFill: Object.keys(node.fills).length === 0 ? null : buildGradientFills(node)
@@ -101,7 +102,7 @@ const specialProperties = {
     "&::before": !node.strokes || Object.keys(node.strokes).length == 0 ? null : buildStrokesBorderGradient(node)
   }),
   strokeWeight: (node) => ({
-    borderWidth: node.strokeWeight ? `${node.strokeWeight}px` : null
+    borderWidth: node.strokeWeight ? node.strokeWeight : null
   }),
   cornerRadius: (node) => ({
   borderRadius: node.cornerRadius && node.cornerRadius !== 0 ? node.cornerRadius : null
@@ -123,7 +124,7 @@ const specialProperties = {
     fontWeight: node.fontName ? buildFontStyle(node.fontName.style) : null,
   }),
   fontSize: (node) => ({
-    fontSize: node.fontSize ? `${node.fontSize}px` : null
+    fontSize: node.fontSize ? node.fontSize : null
   }),
   lineHeight: (node) => ({
     lineHeight: node.lineHeight ? buildLineheight(node.lineHeight) : null
@@ -149,7 +150,7 @@ const specialProperties = {
     backdropFilter: !node.effects || Object.keys(node.effects).length == 0 ? null : node.effects[0] ? buildEffects(node) : null,
   }),
   rotation: (node) => ({
-    rotation: node.rotation ? (node.rotation * -1) : null
+    rotation: node.rotation ? buildRotation(node.rotation) : null
   }),
   strokeMiterLimit: (node) => ({
     strokeMiterlimit: node.strokeMiterLimit ? node.strokeMiterLimit : null

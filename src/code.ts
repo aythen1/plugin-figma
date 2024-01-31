@@ -85,17 +85,17 @@ let getComponentType = (type) => {
     return 'div';
   }
 }
-
-let id = 1
-let createComponent =  async (node) => {
+let createComponent = async (node, value) => {
+  let id = value
   const componentType = getComponentType(node.type);
   const hasChildren = node.type === 'GROUP' || node.type === 'FRAME' || node.type === 'INSTANCE' || node.type === 'COMPONENT' || node.type === 'COMPONENT_SET' || node.type === 'BOOLEAN_OPERATION';
   const componentName = (node.name).substring(0, 24);
   const cssProperties = fnNativeAttributes(node);
   const PropertiesCss = deleteProperties(cssProperties)
-  const position = getAbsolutePosition(node);
   const imageEncode = await getImages(node);
-  
+  const father = figma.currentPage.selection[0].width
+  const position = getAbsolutePosition(node);
+
   let tree = {
     ...templateComponent,
     figmaId: id++,
@@ -114,49 +114,49 @@ let createComponent =  async (node) => {
           width: "1920",
           position: node.layoutPositioning === "ABSOLUTE" ? "absolute" : "static",
           active: true,
-          attribute: {} // node.width > 1919 ? PropertiesCss: {},
+          attribute: father > 1600 ? PropertiesCss: {},
         },
         laptop: {
           width: "1200",
           position: node.layoutPositioning === "ABSOLUTE" ? "absolute" : "static",
           active: true,
-          attribute: {} // node.width > 991 && node.width < 1200 ? PropertiesCss: {},
+          attribute: father >= 991 && father < 1200 ? PropertiesCss: {},
         },
         mobile: {
           width: "479",
           position: node.layoutPositioning === "ABSOLUTE" ? "absolute" : "static",
           active: true,
-          attribute: PropertiesCss
+          attribute: father < 479 ? PropertiesCss: {},
         },
         tablet: {
           width: "991",
           position: node.layoutPositioning === "ABSOLUTE" ? "absolute" : "static",
           active: true,
-          attribute: {} // node.width > 767 && node.width < 991 ? PropertiesCss: {},
+          attribute: father >= 767 && father < 991 ? PropertiesCss: {},
         },
         desktop: {
           width: "1600",
           position: node.layoutPositioning === "ABSOLUTE" ? "absolute" : "static",
           active: true,
-          attribute: {}, // PropertiesCss // node.width > 1200 && node.width < 1600 ? PropertiesCss: {},
+          attribute: father >= 1200 && father <= 1600 ? PropertiesCss: {},
         },
         mobileLandscape: {
           width: "767",
           position: node.layoutPositioning === "ABSOLUTE" ? "absolute" : "static", 
           active: true,
-          attribute: {} // node.width > 1 && node.width < 767 ? PropertiesCss: {},
+          attribute: father > 479 && father < 767 ? PropertiesCss: {},
         }
       },
       grid: {
         height: node.height, 
         width: node.width,
         positionAbsolute: {
-          x: node.layoutPositioning === "ABSOLUTE" ? node.absoluteTransform[0][2] : position.x,
-          y: node.layoutPositioning === "ABSOLUTE" ? node.absoluteTransform[1][2] : position.y
+          x: id === 1 ? 0 : node.x,
+          y: id === 1 ? 0 : node.y
         },
         positionRelative: {
-          x: node.x,
-          y: node.y,
+          x: id === 1 ? 0 : node.x,
+          y: id === 1 ? 0 : node.y,
         }
       },
       event: "",
@@ -173,8 +173,8 @@ let createComponent =  async (node) => {
   }
   if (hasChildren && !(componentType === 'svg')) {
     const childComponents = await Promise.all(
-      node.children.map(async (childNode) => {
-        const childComponent = await createComponent(childNode);
+      node.children.map(async (childNode, i) => {
+        const childComponent = await createComponent(childNode, id + (i+1));
         return childComponent;
       })
     );
@@ -196,17 +196,27 @@ let createComponent =  async (node) => {
   return tree;
 };
 
+const fatherWidth = () => {
+  const father = figma.currentPage.selection[0].width
+    if (father < 479) return 'mobile'
+    else if (father >= 479 && father < 767) return 'mobileLandscape'
+    else if (father >= 767 && father < 991) return 'tablet'
+    else if (father >= 991 && father < 1200) return 'laptop'
+    else if (father >= 1200 && father <= 1600) return 'desktop'
+    else return 'wide'
+  }
+
 figma.showUI(__html__, { themeColors: true, height: 300 });
 
 figma.ui.onmessage = async (msg) => {
   if (msg.type === "figma-json") {
     try {
       const selectedComponent = figma.currentPage.selection[0];
-      const jsonTree = await createComponent(selectedComponent);
-      changeVisibility(jsonTree)
-      updateZIndex(jsonTree)
-      modifyPosition(jsonTree)
-      updateProperties(jsonTree)
+      const jsonTree = await createComponent(selectedComponent, 1);
+      changeVisibility(jsonTree, fatherWidth())
+      updateZIndex(jsonTree, fatherWidth() )
+      modifyPosition(jsonTree, fatherWidth())
+      // updateProperties(jsonTree, fatherWidth())
       const jsonText = JSON.stringify(jsonTree, null, 2);
       
       figma.ui.postMessage({ type: "json-data", data: jsonText });

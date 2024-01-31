@@ -7,9 +7,18 @@ export const deleteProperties = (props) => {
     return props;
 }
 
-export const updateZIndex = (node, zIndex = 0) => {
+export const updateZIndex = (node, screen, zIndex = 0) => {
+  // actualizar el padre a x = 0, y = 0
+  if (node.figmaId === 1) {
+    node.Property.style[screen].position = "relative"
+    node.Property.grid.positionAbsolute.x = 0;
+    node.Property.grid.positionAbsolute.y = 0;
+    node.Property.grid.positionRelative.x = 0;
+    node.Property.grid.positionRelative.y = 0;
+    }  
+  
   // Actualiza el zIndex del objeto actual
-  node.Property.style.desktop.attribute.zIndex = zIndex;
+  node.Property.style[screen].attribute.zIndex = zIndex;
 
   // Si el objeto tiene hijos, recorre cada uno de ellos
   if (node.children.length > 0) {
@@ -18,12 +27,22 @@ export const updateZIndex = (node, zIndex = 0) => {
       const newZIndex = zIndex+ i + 2;
       // Llama a la función recursivamente para cada hijo,
       // pasando el nuevo zIndex como argumento
-      updateZIndex(node.children[i], newZIndex);
+      updateZIndex(node.children[i], screen, newZIndex);
     }
   }
 }
 
-export const updateProperties = (data, originalX = data.Property.grid.positionAbsolute.x, originalY = data.Property.grid.positionAbsolute.y) => {
+export const updateProperties = (data, screen) => {
+  if (data.figmaId === 1) {
+    data.Property.style[screen].position = "relative"
+    data.Property.grid.positionAbsolute.x = 0;
+    data.Property.grid.positionAbsolute.y = 0;
+    data.Property.grid.positionRelative.x = 0;
+    data.Property.grid.positionRelative.y = 0;
+    }    
+}
+
+export const updatePropertiess = (data, originalX = data.Property.grid.positionAbsolute.x, originalY = data.Property.grid.positionAbsolute.y) => {
   if (data.figmaId === 1) {
     data.Property.style.desktop.position = "relative"
     originalX = data.Property.grid.positionAbsolute.x;
@@ -35,53 +54,54 @@ export const updateProperties = (data, originalX = data.Property.grid.positionAb
         data.children.forEach(child => {
             child.Property.grid.positionAbsolute.x -= originalX;
             child.Property.grid.positionAbsolute.y -= originalY;
-            updateProperties(child, originalX, originalY);
+            updatePropertiess(child, originalX, originalY);
         });
     }
 }
 
-export const modifyPosition = (node) => {
-  // node.Property.style.desktop.position = "relative"
-    if (node.hasChildren && node.children) {
+export const modifyPosition = (node, screen) => {
+     if (node.hasChildren && node.children) {
     node.children.forEach(child => {
-      if (child.Property.style.desktop) {
-        if (child.Property.style.desktop.position !== 'absolute') {
-          if (node.Property.style.desktop.attribute.display === 'flex') {
-            child.Property.style.desktop.position = 'static';
+      if (child.Property.style[screen]) {
+        if (child.Property.style[screen].position !== 'absolute') {
+          if (node.Property.style[screen].attribute.display === 'flex' ) {
+            child.Property.style[screen].position = 'static';
           } else {
-            child.Property.style.desktop.position = 'fixed';
-            // child.Property.grid.positionAbsolute.x -= originalX;
-            // child.Property.grid.positionAbsolute.y -= originalY;
+            child.Property.style[screen].position = 'fixed';
+            // child.Property.grid.positionAbsolute.x -= node.Property.grid.positionAbsolute.x;
+            child.Property.grid.positionAbsolute.x = 0
+            child.Property.grid.positionAbsolute.y -= node.Property.grid.positionAbsolute.y;
+            child.Property.grid.positionRelative.x -= node.Property.grid.positionRelative.x;
+            child.Property.grid.positionRelative.y -= node.Property.grid.positionRelative.y;
           }
         }
       }
-      modifyPosition(child);
+      modifyPosition(child, screen);
     });
   }
   return node;
 }
 
-export const changeVisibility = (node) => {
+export const changeVisibility = (node, screen) => {
   // Si el nodo no es visible, establece todos sus hijos como no visibles y 'isShow' en false
-  if (node.Property?.style?.desktop?.attribute?.visibility === "hidden" ) {
+  if (node.Property.style[screen].attribute.visibility === "hidden" ) {
     node.isShow = false;
     if (node.hasChildren) {
       node.children.forEach(child => {
-        child.Property.style.desktop.attribute.visibility = "hidden";
+        child.Property.style[screen].attribute.visibility = "hidden";
         child.isShow = false;
-        changeVisibility(child);
+        changeVisibility(child, screen);
       });      
     }
   } else if (node.hasChildren) {
     // Si el nodo es visible, recorre sus hijos
-    node.children.forEach(changeVisibility);
+    node.children.forEach((child) => changeVisibility(child, screen));
   }
 }
 
 /**
  * Positions
 */
-
 
 export const getAbsolutePosition = (node) => {
   if (
@@ -102,15 +122,15 @@ export const getAbsolutePosition = (node) => {
   let parent: SceneNode | null = node;
   while ((parent = parent.parent as SceneNode | null)) {
     if (!isGroupNode(parent) && typeof parent.x === "number") {
-        position.x += parent.x;
-        position.y += parent.y;
+        position.x -= parent.x;
+        position.y -= parent.y;
     }
     if (["PAGE", "DOCUMENT"].includes(parent.parent!?.type)) {
       break;
     }
   }
   return position;
-  };
+};
 
 export const isGroupNode = (node: unknown): node is GroupNode =>
     !!(node && (node as any).type === "GROUP");
@@ -138,14 +158,11 @@ export const getVisibility = (node) => {
   * @returns layoutMode --> flexDirection 
 */
 export const getLayoutMode = (node) => {
-  // Simple single layer group wrapping we can ignore
-  if (isGroupNode(node) && node.children?.length === 1) {
+ 
+  if (node.inferredAutoLayout.layoutMode === "VERTICAL") {
     return "column";
   }
-  if ((node).layoutMode === "VERTICAL") {
-    return "column";
-  }
-  if ((node).layoutMode === "HORIZONTAL") {
+  if (node.inferredAutoLayout.layoutMode === "HORIZONTAL") {
     return "row";
   }
   return null;
@@ -161,16 +178,16 @@ export const getLayoutMode = (node) => {
       ‘SPACE_BETWEEN’ en Figma puede corresponder a ‘space-between’ en CSS
  */
 export const getPrimaryAxisAlignItems = (node) => {
-  if (node.primaryAxisAlignItems === "MIN") {
+  if (node.inferredAutoLayout.primaryAxisAlignItems === "MIN") {
     return "flex-start";
   }
-  if (node.primaryAxisAlignItems === "MAX") {
+  if (node.inferredAutoLayout.primaryAxisAlignItems === "MAX") {
     return "flex-end";
   }
-  if (node.primaryAxisAlignItems === "CENTER") {
+  if (node.inferredAutoLayout.primaryAxisAlignItems === "CENTER") {
     return "center";
   }
-  if (node.primaryAxisAlignItems === "SPACE_BETWEEN") {
+  if (node.inferredAutoLayout.primaryAxisAlignItems === "SPACE_BETWEEN") {
     return "space-between";
   }
   return null;
@@ -186,16 +203,16 @@ export const getPrimaryAxisAlignItems = (node) => {
       ‘BASELINE’ en Figma puede corresponder a ‘baseline’ en CSS.
  */
 export const getCounterAxisAlignItems = (node) => {
-  if (node.counterAxisAlignItems === "MIN") {
+  if (node.inferredAutoLayout.counterAxisAlignItems === "MIN") {
     return "flex-start";
   }
-  if (node.counterAxisAlignItems === "MAX") {
+  if (node.inferredAutoLayout.counterAxisAlignItems === "MAX") {
     return "flex-end";
   }
-  if (node.counterAxisAlignItems === "CENTER") {
+  if (node.inferredAutoLayout.counterAxisAlignItems === "CENTER") {
     return "center";
   }
-  if (node.counterAxisAlignItems === "BASELINE") {
+  if (node.inferredAutoLayout.counterAxisAlignItems === "BASELINE") {
     return "baseline";
   }
   return null;
@@ -288,6 +305,8 @@ export const buildWebkitText = (node) => {
   return null
 }
 
+
+
 const rgbToHex= (int) => {
   var hex = Number(Math.round(255 * int)).toString(16);
   if (hex.length < 2) {
@@ -375,11 +394,11 @@ const figmaTransformToCSSAngle = (figmaTransform) => {
     let b = figmaTransform[0][1];   
 
     // Convertir el ángulo a grados
-  let angleInDegrees = Math.round(Math.atan2(b, a) * (180 / Math.PI));
-   angleInDegrees = angleInDegrees + 89
+  let angleInDegrees = Math.round(Math.atan2(b, a) * (90 / Math.PI));
+   angleInDegrees = angleInDegrees 
 
     // Asegurarse de que el ángulo esté entre 0 y 360 grados
-   return angleInDegrees < 0 ? angleInDegrees + 360 : angleInDegrees;
+   return angleInDegrees < 0 ? angleInDegrees + 180 : angleInDegrees;
 }
 
 const transformToCSSAngle = (figmaTransform) => {
@@ -550,6 +569,15 @@ export const buildGradientFills = (node) => {
   }
   
   return null
+}
+
+export const buildRotation = (rotation) => { 
+  if (rotation === -180 ) {
+    return rotation + 90
+  } else if (rotation === 180) {
+    return rotation - 90
+  }
+  return rotation * -1
 }
 
 /**
