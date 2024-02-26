@@ -11,10 +11,13 @@ export const updateZIndex = (node, screen, zIndex = 0) => {
   // actualizar el padre a x = 0, y = 0
   if (node.figmaId === 1) {
     node.Property.style[screen].position = "relative"
-    node.Property.grid.positionAbsolute.x = 0;
-    node.Property.grid.positionAbsolute.y = 0;
-    node.Property.grid.positionRelative.x = 0;
-    node.Property.grid.positionRelative.y = 0;
+    node.Property.style[screen].grid.positionAbsolute.x = 0;
+    node.Property.style[screen].grid.positionAbsolute.y = 0;
+    node.Property.style[screen].grid.positionRelative.x = 0;
+    node.Property.style[screen].grid.positionRelative.y = 0;
+    
+    node.x = 0;
+    node.y = 0;
     }  
   
   // Actualiza el zIndex del objeto actual
@@ -24,7 +27,7 @@ export const updateZIndex = (node, screen, zIndex = 0) => {
   if (node.children.length > 0) {
     for (let i = 0; i < node.children.length; i++) {
       // Calcula el nuevo zIndex para el hijo actual
-      const newZIndex = zIndex+ i + 2;
+      const newZIndex = zIndex + i + 2;
       // Llama a la función recursivamente para cada hijo,
       // pasando el nuevo zIndex como argumento
       updateZIndex(node.children[i], screen, newZIndex);
@@ -32,54 +35,95 @@ export const updateZIndex = (node, screen, zIndex = 0) => {
   }
 }
 
-export const updateProperties = (data, screen) => {
-  if (data.figmaId === 1) {
-    data.Property.style[screen].position = "relative"
-    data.Property.grid.positionAbsolute.x = 0;
-    data.Property.grid.positionAbsolute.y = 0;
-    data.Property.grid.positionRelative.x = 0;
-    data.Property.grid.positionRelative.y = 0;
-    }    
+
+const gradoInclinacion = (width, height) => {
+
+    const centroX = width / 2;
+    const centroY = height / 2;
+    
+    const esquinaX = width;
+    const esquinaY = height;
+    
+    const catetoOpuesto = esquinaY - centroY;
+    const catetoAdyacente = esquinaX - centroX;
+    
+    const hipotenusa = Math.sqrt(Math.pow(catetoOpuesto, 2) + Math.pow(catetoAdyacente, 2));
+    
+    const radianes = Math.atan2(catetoOpuesto, catetoAdyacente);
+    
+    const grados = radianes * (180 / Math.PI);
+    
+    return 90 - grados;
 }
 
-export const updatePropertiess = (data, originalX = data.Property.grid.positionAbsolute.x, originalY = data.Property.grid.positionAbsolute.y) => {
-  if (data.figmaId === 1) {
-    data.Property.style.desktop.position = "relative"
-    originalX = data.Property.grid.positionAbsolute.x;
-    originalY = data.Property.grid.positionAbsolute.y;
-    data.Property.grid.positionAbsolute.x = 0;
-    data.Property.grid.positionAbsolute.y = 0;
-    }
-    if (data.hasChildren) {
-        data.children.forEach(child => {
-            child.Property.grid.positionAbsolute.x -= originalX;
-            child.Property.grid.positionAbsolute.y -= originalY;
-            updatePropertiess(child, originalX, originalY);
-        });
-    }
+const  rever = (xr, yr, w, h, deg) => {
+  const d = Math.sqrt(Math.pow(w/2, 2) + Math.pow(h/2, 2))
+  const rad = ((deg + gradoInclinacion(w, h)) * Math.PI)/180
+  const x1 = d * Math.sin(rad)
+  const y1 = d * Math.cos(rad)
+    
+  return {
+    x: xr + x1 - w/2,
+    y: yr + y1 - h/2
+  }
+}
+
+export const updateProperties = (node, screen) => {
+    if (node.Property.style[screen].attribute.rotation <= 180) {
+    const angle = node.Property.style[screen].attribute.rotation
+    const grid = node.Property.style[screen].grid
+    const newGrid = rever(grid.positionAbsolute.x, grid.positionAbsolute.y, grid.width, grid.height, angle)
+    node.Property.style[screen].grid.positionAbsolute.x = newGrid.x
+    node.Property.style[screen].grid.positionAbsolute.y = newGrid.y
+  }
+  if (node.hasChildren) {
+    node.children.forEach(child => {
+      updateProperties(child, screen);
+    });
+  }
 }
 
 export const modifyPosition = (node, screen) => {
-     if (node.hasChildren && node.children) {
+  const parentGrid = node.Property.style[screen].grid  
+  if (node.hasChildren && node.children) {
     node.children.forEach(child => {
+      const grid = child.Property.style[screen].grid
       if (child.Property.style[screen]) {
         if (child.Property.style[screen].position !== 'absolute') {
           if (node.Property.style[screen].attribute.display === 'flex' ) {
             child.Property.style[screen].position = 'static';
           } else {
-            child.Property.style[screen].position = 'fixed';
-            // child.Property.grid.positionAbsolute.x -= node.Property.grid.positionAbsolute.x;
-            child.Property.grid.positionAbsolute.x = 0
-            child.Property.grid.positionAbsolute.y -= node.Property.grid.positionAbsolute.y;
-            child.Property.grid.positionRelative.x -= node.Property.grid.positionRelative.x;
-            child.Property.grid.positionRelative.y -= node.Property.grid.positionRelative.y;
+            child.Property.style[screen].position = 'absolute';
+            if (node.type === "GROUP" ) {              
+              grid.positionAbsolute.x -= node.x;
+              grid.positionAbsolute.y -= node.y;
+            }
+            grid.x -= parentGrid.positionRelative.x;
+            grid.y -= parentGrid.positionRelative.y;
           }
         }
+        modifyPosition(child, screen);
       }
-      modifyPosition(child, screen);
     });
   }
-  return node;
+}
+
+export const buildRotation = (node, screen) => {
+  if (node.Property.style[screen].attribute.rotation) {
+    const deg = node.Property.style[screen].attribute.rotation
+
+    if (deg === -180 ) {
+      node.Property.style[screen].attribute.rotation = (deg + 90)
+    } else if (deg === 180) {
+      node.Property.style[screen].attribute.rotation = (deg - 90) 
+    }
+      node.Property.style[screen].attribute.rotation = deg * -1
+  }
+  if (node.hasChildren) {
+    node.children.forEach(child => {
+      buildRotation(child, screen);
+    });
+  }
 }
 
 export const changeVisibility = (node, screen) => {
@@ -166,6 +210,30 @@ export const getLayoutMode = (node) => {
     return "row";
   }
   return null;
+};
+
+export const getLayoutSizingHorizontal = (node) => {
+  if (node.layoutSizingHorizontal === "FIXED") {
+    return "fixed"; // Width fijo
+  }
+  if (node.layoutSizingHorizontal === "FILL") {
+    return "fill" // Width 100%; 
+  }
+  if (node.layoutSizingHorizontal === "HUG") {
+    return "hug"; // Width auto
+  }
+};
+
+export const getLayoutSizingVertictal = (node) => { 
+  if (node.layoutSizingVertical && node.layoutSizingVertical === "FIXED") {
+    return "fixed"; // Height fijo
+  }
+  if (node.layoutSizingVertical && node.layoutSizingVertical === "FILL") {
+    return "fill" // Height 100%; 
+  }
+  if (node.layoutSizingVertical && node.layoutSizingVertical === "HUG") {
+    return "hug"; // Height auto
+  }
 };
 
 /**
@@ -258,24 +326,6 @@ export const getTextColor = (node) => {
   return "transparent";
 }
 
-// export async function getImages(node) {
-//   if (node.fills && node.fills[0]) {
-//   const image = node.fills[0]
-//   if (image.type === "IMAGE") {
-//       const imageConvert = figma.getImageByHash(image.imageHash)
-//       const imageEncode = await imageConvert.getBytesAsync()
-//     const imgArray = Object.values(imageEncode)
-      
-//     return {
-//       image: imgArray,
-//       src: ""
-//     }
-//   }
-//     return null
-//   }
-//   return null;
-// }
-
 export async function getImages(node) {
   if (node.fills && node.fills.length > 0) {
     const image = await Promise.all( node.fills.map(async (fill) => {
@@ -305,10 +355,8 @@ export const buildWebkitText = (node) => {
   return null
 }
 
-
-
 const rgbToHex= (int) => {
-  var hex = Number(Math.round(255 * int)).toString(16);
+  let hex = Number(Math.round(255 * int)).toString(16);
   if (hex.length < 2) {
     hex = "0" + hex;
   }
@@ -320,6 +368,13 @@ const makeHex = (r, g, b) => {
   let green = rgbToHex(g);
   let blue = rgbToHex(b);
   return '#' + red + green + blue;
+}
+const rgbaToHex = (r, g, b, a) => {
+  let red = rgbToHex(r);
+  let green = rgbToHex(g);
+  let blue = rgbToHex(b);
+  let alpha = rgbToHex(Math.floor(a * 255));
+  return '#' + red + green + blue + alpha;
 }
 
 const getTx = (deg) => {
@@ -394,11 +449,11 @@ const figmaTransformToCSSAngle = (figmaTransform) => {
     let b = figmaTransform[0][1];   
 
     // Convertir el ángulo a grados
-  let angleInDegrees = Math.round(Math.atan2(b, a) * (90 / Math.PI));
-   angleInDegrees = angleInDegrees 
+  let angleInDegrees = Math.round(Math.atan2(b, a) * (180 / Math.PI));
+   angleInDegrees = angleInDegrees + 89
 
     // Asegurarse de que el ángulo esté entre 0 y 360 grados
-   return angleInDegrees < 0 ? angleInDegrees + 180 : angleInDegrees;
+   return angleInDegrees < 0 ? angleInDegrees + 360 : angleInDegrees;
 }
 
 const transformToCSSAngle = (figmaTransform) => {
@@ -423,7 +478,7 @@ const getDegreesForMatrix = (matrix) => {
   return `${degrees}deg`;
 }
 
-export const convertBorderGradient = (node) => {  
+export const convertBorderGradient = (node) => {
     if (node.fills[0].visible === false) return null
     const paint = node.fills.find(item => item.type === 'GRADIENT_LINEAR' || item.type === 'GRADIENT_ANGULAR' || item.type === 'GRADIENT_RADIAL' || item.type === 'GRADIENT_DIAMOND');
     if (!paint || paint === "undefined") return null
@@ -445,11 +500,69 @@ export const convertBorderGradient = (node) => {
       return `conic-gradient(from ${gradientTransformString}, ${gradientStopsString}) 1`// OJO ESTE
     }  
 }
-
-export const convertFigmaGradientToString = (node) => {  
+/*
+gradients:
+[
+  {
+    grade: 0,
+    color: '#ffffff',
+    percentage: 0,
+    active: true
+  },
+  {
+    grade: 0,
+    color: '#ffffff',
+    percentage: 0,
+    active: true
+  }
+] 
+ */
+/**
+ "fills": [
+            {
+              "type": "GRADIENT_LINEAR",
+              "visible": true,
+              "opacity": 1,
+              "blendMode": "NORMAL",
+              "gradientStops": [
+                {
+                  "color": {
+                    "r": 0.0625,
+                    "g": 0.15625,
+                    "b": 1,
+                    "a": 1
+                  },
+                  "position": 0
+                },
+                {
+                  "color": {
+                    "r": 0.0625,
+                    "g": 0.15625,
+                    "b": 1,
+                    "a": 0
+                  },
+                  "position": 1
+                }
+              ],
+              "gradientTransform": [
+                [
+                  6.123234262925839e-17,
+                  1,
+                  0
+                ],
+                [
+                  -1,
+                  6.123234262925839e-17,
+                  1
+                ]
+              ]
+            }
+          ],
+ */
+export const convertFigmaGradientToString = (node) => {
     if (node.fills[0].visible === false) return null
     const paint = node.fills.find(item => item.type === 'GRADIENT_LINEAR' || item.type === 'GRADIENT_ANGULAR' || item.type === 'GRADIENT_RADIAL' || item.type === 'GRADIENT_DIAMOND');
-    if (!paint || paint === "undefined") return null
+    if (!paint || paint === undefined) return null
   
     const { gradientTransform, gradientStops } = paint;
     const gradientStopsString = gradientStops
@@ -458,13 +571,27 @@ export const convertFigmaGradientToString = (node) => {
       })
       .join(', ');
     const gradientTransformString = getDegreesForMatrix(gradientTransform);
-    const gradientTransformCss = getDegrade(gradientTransform);
+  const gradientTransformCss = getDegrade(gradientTransform);
+  const grade = figmaTransformToCSSAngle(gradientTransform)
   
     if (node.type === "TEXT" && paint.type === "GRADIENT_LINEAR") {
       return `-webkit-linear-gradient(${gradientTransformCss}, ${gradientStopsString})`
     }
     if (paint.type === "GRADIENT_LINEAR") {
-      return `linear-gradient(${gradientTransformString}, ${gradientStopsString})`
+      const gradients = gradientStops.map(stop => {
+        const cssColor = (r, g, b, a) => {
+          return `rgba(${(r * 255).toString()}, ${(g * 255).toString()}, ${(b * 255).toString()}, ${a})`           
+        }; 
+        const colors = cssColor(stop.color.r, stop.color.g, stop.color.b, stop.color.a)
+        const hexaColor = rgbaToHex(stop.color.r, stop.color.g, stop.color.b, stop.color.a)
+        return {
+          grade: grade,
+          color: colors,
+          percentage: Math.round(stop.position * 100 * 100) / 100,
+          active: true
+        };
+      });
+      return gradients;
     } else if (paint.type === 'GRADIENT_RADIAL') {
       return `radial-gradient(${gradientStopsString})`
     } else if (paint.type === 'GRADIENT_ANGULAR') {
@@ -473,6 +600,33 @@ export const convertFigmaGradientToString = (node) => {
       return `conic-gradient(from ${gradientTransformString}, ${gradientStopsString})`// OJO ESTE
     }  
 }
+// export const convertFigmaGradientToString = (node) => {
+//     if (node.fills[0].visible === false) return null
+//     const paint = node.fills.find(item => item.type === 'GRADIENT_LINEAR' || item.type === 'GRADIENT_ANGULAR' || item.type === 'GRADIENT_RADIAL' || item.type === 'GRADIENT_DIAMOND');
+//     if (!paint || paint === undefined) return null
+  
+//     const { gradientTransform, gradientStops } = paint;
+//     const gradientStopsString = gradientStops
+//       .map((stop) => {
+//         return `#${rgbToHex(stop.color.r)}${rgbToHex(stop.color.g)}${rgbToHex(stop.color.b)} ${Math.round(stop.position * 100 * 100) / 100}%`
+//       })
+//       .join(', ');
+//     const gradientTransformString = getDegreesForMatrix(gradientTransform);
+//     const gradientTransformCss = getDegrade(gradientTransform);
+  
+//     if (node.type === "TEXT" && paint.type === "GRADIENT_LINEAR") {
+//       return `-webkit-linear-gradient(${gradientTransformCss}, ${gradientStopsString})`
+//     }
+//     if (paint.type === "GRADIENT_LINEAR") {
+//       return `linear-gradient(${gradientTransformString}, ${gradientStopsString})`
+//     } else if (paint.type === 'GRADIENT_RADIAL') {
+//       return `radial-gradient(${gradientStopsString})`
+//     } else if (paint.type === 'GRADIENT_ANGULAR') {
+//       return `conic-gradient(from ${gradientTransformString}, ${gradientStopsString})`
+//     } else if (paint.type === 'GRADIENT_DIAMOND') {
+//       return `conic-gradient(from ${gradientTransformString}, ${gradientStopsString})`// OJO ESTE
+//     }  
+// }
 
 /**
  * 
@@ -571,14 +725,7 @@ export const buildGradientFills = (node) => {
   return null
 }
 
-export const buildRotation = (rotation) => { 
-  if (rotation === -180 ) {
-    return rotation + 90
-  } else if (rotation === 180) {
-    return rotation - 90
-  }
-  return rotation * -1
-}
+
 
 /**
  * STYLES TEXT
@@ -586,32 +733,36 @@ export const buildRotation = (rotation) => {
  * @returns Number
 */
 export const buildFontStyle = (style) => {
-  if (style === 'Thin') return 100
-  else if (style === 'ExtraLight') return 200
-  else if (style === 'Light') return 300
-  else if (style === 'Regular') return 400
-  else if (style === 'Medium') return 500
-  else if (style === 'SemiBold') return 600
-  else if (style === 'Bold') return 700
-  else if (style === 'ExtraBold') return 800
-  else if (style === 'Black') return 900
-  else return style
+  if (style.includes("Italic")) return "italic";
+  else return null;
 }
 
-export const buildLetterspacing = (letterSpacing) => {
-  if (letterSpacing.unit === 'PERCENT') return `${letterSpacing.value / 100}em`
-  if (letterSpacing.unit === 'PIXELS') return `${letterSpacing.value}px`  
+export const buildLetterspacing = (letterSpacing, fontSize) => {
+  if (letterSpacing.unit === 'PERCENT') return (letterSpacing.value / 100) * fontSize
+  if (letterSpacing.unit === 'PIXELS') return letterSpacing.value  
 }
 
-export const buildLineheight = (lineHeight) => {
-  if (lineHeight.unit === 'PERCENT') return `${lineHeight.value / 100}em`
-  if (lineHeight.unit === 'PIXELS') return `${lineHeight.value}px`  
+export const buildLineheight = (lineHeight, fontSize) => {
+  if (lineHeight.unit === 'PERCENT') return (lineHeight.value / 100) * fontSize
+  if (lineHeight.unit === 'PIXELS') return lineHeight.value
 }
+
+// export const buildLetterspacing = (letterSpacing) => {
+//   if (letterSpacing.unit === 'PERCENT') return `${letterSpacing.value / 100}em`
+//   if (letterSpacing.unit === 'PIXELS') return `${letterSpacing.value}px`  
+// }
+
+// export const buildLineheight = (lineHeight) => {
+//   if (lineHeight.unit === 'PERCENT') return `${lineHeight.value / 100}em`
+//   if (lineHeight.unit === 'PIXELS') return `${lineHeight.value}px`
+// }
 
 export const buildTextalign = (textAlign) => {
   if (textAlign === 'LEFT') return 'start'
   if (textAlign === 'CENTER') return 'center'
   if (textAlign === 'RIGHT') return 'end'
+  if (textAlign === 'JUSTIFIED') return 'justify'
+
 }
 
 export const buildVerticalalign = (verticalAlign) => {
@@ -632,7 +783,7 @@ export const buildTextcase = (textCase) => {
   if (textCase === 'LOWER') return 'lowercase'
   if (textCase === 'TITLE') return 'capitalize'
 }
-  
+
 /**
    * EFFECTS: 
    * Shadows
@@ -644,19 +795,28 @@ export const buildTextcase = (textCase) => {
   */ 
 export const buildEffects = (node) => {
   if (node.effects[0].visible === false) return null
-  const { type, offset, radius, spread, color } = node.effects[0]
-  if(!node.effects[0] || Object.keys(node.effects[0]).length == 0 || !type) return null
-  if (type === 'DROP_SHADOW') {
-    return `${offset.x}px ${offset.y}px ${radius}px ${spread}px rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})`    
+  const effects = node.effects[0]
+  // const hexaColor = makeHex(effects.color.r, effects.color.g, effects.color.b)
+  if(!node.effects[0] || Object.keys(node.effects[0]).length === 0 || !effects.type) return null
+  if (effects.type === 'DROP_SHADOW') {
+    // return `${offset.x}px ${offset.y}px ${radius}px ${spread}px rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})`
+    return [{
+      ejeX: effects.offset.x,
+      ejeY: effects.offset.y,
+      blur: effects.radius,
+      opacity: effects.color.a * 100,
+      color: effects.hexaColor,
+      inset: false
+    }]
   }
-  if (type === 'INNER_SHADOW') {
-    return `${offset.x}px ${offset.y}px ${radius}px ${spread}px rgba(${color.r}, ${color.g}, ${color.b}, ${color.a}) inset`    
+  if (effects.type === 'INNER_SHADOW') {
+    return `${effects.offset.x}px ${effects.offset.y}px ${effects.radius}px ${effects.spread}px rgba(${effects.color.r}, ${effects.color.g}, ${effects.color.b}, ${effects.color.a}) inset`    
   }
-  if (type === 'LAYER_BLUR') {
-    return `blur(${radius/2}px)`   
+  if (effects.type === 'LAYER_BLUR') {
+    return `blur(${effects.radius/2}px)`
   }
-  if (type === 'BACKGROUND_BLUR') {
-    return `blur(${radius/2}px)`   
+  if (effects.type === 'BACKGROUND_BLUR') {
+    return `blur(${effects.radius/2}px)`
   }
 }
 

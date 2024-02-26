@@ -1,5 +1,5 @@
 import { fnNativeAttributes } from './components/CssProperties';
-import { getAbsolutePosition, getImages, changeVisibility, updateZIndex, updateProperties, deleteProperties, modifyPosition } from './components/PropertiesHandlers';
+import { getImages, changeVisibility, updateZIndex, updateProperties, deleteProperties, modifyPosition, buildRotation } from './components/PropertiesHandlers';
 
 let templateComponent = {
   "tag": "span",
@@ -18,53 +18,107 @@ let templateComponent = {
   "Property": {
     "style": {
       "wide": {
-        "width": "1920",
+        "grid": {
+          "height": "",
+          "width": "",
+          "positionAbsolute": {
+            "x": 0,
+            "y": 0,
+          },
+          "positionRelative": {
+            "x": 0,
+            "y": 0,
+          }
+       },
         "position": "absolute",
         "active": true,
         "attribute": {}
       },
       "laptop": {
-        "width": "1200",
+        "grid": {
+          "height": "",
+          "width": "",
+          "positionAbsolute": {
+            "x": 0,
+            "y": 0,
+          },
+          "positionRelative": {
+            "x": 0,
+            "y": 0,
+          }
+        },
         "position": "absolute",
         "active": true,
         "attribute": {}
       },
       "mobile": {
-        "width": "479",
+        "grid": {
+          "height": "",
+          "width": "",
+          "positionAbsolute": {
+            "x": 0,
+            "y": 0,
+          },
+          "positionRelative": {
+            "x": 0,
+            "y": 0,
+          }
+        },
         "position": "absolute",
         "active": true,
         "attribute": {}
       },
       "tablet": {
-        "width": "991",
+        "grid": {
+          "height": "",
+          "width": "",
+          "positionAbsolute": {
+            "x": 0,
+            "y": 0,
+          },
+          "positionRelative": {
+            "x": 0,
+            "y": 0,
+          }
+        },
         "position": "absolute",
         "active": true,
         "attribute": {}
       },
       "desktop": {
-        "width": "1600",
+        "grid": {
+          "height": "",
+          "width": "",
+          "positionAbsolute": {
+            "x": 0,
+            "y": 0,
+          },
+          "positionRelative": {
+            "x": 0,
+            "y": 0,
+          }
+        },
         "position": "absolute",
         "active": true,
         "attribute":[], 
       },
       "mobileLandscape": {
-        "width": "767",
+        "grid": {
+          "height": "",
+          "width": "",
+          "positionAbsolute": {
+            "x": 0,
+            "y": 0,
+          },
+          "positionRelative": {
+            "x": 0,
+            "y": 0,
+          }
+        },
         "position": "absolute",
         "active": true,
         "attribute": {}
       }
-    },
-    "grid": {
-      "height": "",
-      "width": "",
-      "positionAbsolute": {
-          "x": 0,
-          "y": 0,
-        },
-        "positionRelative": {
-          "x": 0,
-          "y": 0,
-        }
     },
     "event": "",
     "state": {},
@@ -72,30 +126,39 @@ let templateComponent = {
   }
 };
 
-let getComponentType = (type) => {
-  if (type === 'RECTANGLE') {
+let getComponentType = (node) => {
+  if (node.type === 'RECTANGLE') {
     return 'div';
-  } else if (type === 'TEXT') {
+  } else if (node.type === 'TEXT' && node.hyperlink) {    
+     return 'a'
+  } else if (node.type === 'TEXT' && !node.hyperlink) {
     return 'span';
-  } else if (type === 'ELLIPSE' || type === 'STAR' || type === "POLYGON" || type === 'VECTOR' || type === 'LINE') {
+  } else if (node.type === 'ELLIPSE' || node.type === 'STAR' || node.type === "POLYGON" || node.type === 'VECTOR' || node.type === 'LINE') {
     return 'svg';
-  } else if (type === 'IMAGE') {
+  } else if (node.type === 'IMAGE') {
     return 'img';
   } else {
     return 'div';
   }
 }
+function getUrl(node) {
+  if (node.type === "TEXT" && node.hyperlink) {
+    return node.hyperlink.value;
+  }
+  return "";
+}
+
 let createComponent = async (node, value) => {
   let id = value
-  const componentType = getComponentType(node.type);
+  const componentType = getComponentType(node);
   const hasChildren = node.type === 'GROUP' || node.type === 'FRAME' || node.type === 'INSTANCE' || node.type === 'COMPONENT' || node.type === 'COMPONENT_SET' || node.type === 'BOOLEAN_OPERATION';
   const componentName = (node.name).substring(0, 24);
   const cssProperties = fnNativeAttributes(node);
   const PropertiesCss = deleteProperties(cssProperties)
   const imageEncode = await getImages(node);
   const father = figma.currentPage.selection[0].width
-  const position = getAbsolutePosition(node);
-
+  const url = getUrl(node)
+    
   let tree = {
     ...templateComponent,
     figmaId: id++,
@@ -104,66 +167,136 @@ let createComponent = async (node, value) => {
     name: componentName,
     tagName: componentType,
     image: imageEncode,
+    src: url,
     nativeAttributes: {
       value: "text",
-      innerHTML: node.characters? node.characters : ""
+      innerHTML: node.characters ? node.characters : ""
     },
     Property: {
       style: {
         wide: {
-          width: "1920",
+          grid: {
+            height: node.height,
+            width: node.width,
+            positionAbsolute: {
+              x: id === 1 ? 0 : node.x,
+              y: id === 1 ? 0 : node.y
+            },
+            positionRelative: {
+              x: id === 1 ? 0 : node.x,
+              y: id === 1 ? 0 : node.y,
+            }
+          },
           position: node.layoutPositioning === "ABSOLUTE" ? "absolute" : "static",
           active: true,
           attribute: father > 1600 ? PropertiesCss: {},
         },
         laptop: {
-          width: "1200",
+          grid: {
+            height: node.height,
+            width: node.width,
+            positionAbsolute: {
+              x: id === 1 ? 0 : node.x,
+              y: id === 1 ? 0 : node.y
+            },
+            positionRelative: {
+              x: id === 1 ? 0 : node.x,
+              y: id === 1 ? 0 : node.y,
+            }
+          },
           position: node.layoutPositioning === "ABSOLUTE" ? "absolute" : "static",
           active: true,
           attribute: father >= 991 && father < 1200 ? PropertiesCss: {},
         },
         mobile: {
-          width: "479",
+          grid: {
+            height: node.height,
+            width: node.width,
+            positionAbsolute: {
+              x: id === 1 ? 0 : node.x,
+              y: id === 1 ? 0 : node.y
+            },
+            positionRelative: {
+              x: id === 1 ? 0 : node.x,
+              y: id === 1 ? 0 : node.y,
+            }
+          },
           position: node.layoutPositioning === "ABSOLUTE" ? "absolute" : "static",
           active: true,
           attribute: father < 479 ? PropertiesCss: {},
         },
         tablet: {
-          width: "991",
+          grid: {
+            height: node.height,
+            width: node.width,
+            positionAbsolute: {
+              x: id === 1 ? 0 : node.x,
+              y: id === 1 ? 0 : node.y
+            },
+            positionRelative: {
+              x: id === 1 ? 0 : node.x,
+              y: id === 1 ? 0 : node.y,
+            }
+          },
           position: node.layoutPositioning === "ABSOLUTE" ? "absolute" : "static",
           active: true,
           attribute: father >= 767 && father < 991 ? PropertiesCss: {},
         },
         desktop: {
-          width: "1600",
+          grid: {
+            height: node.height,
+            width: node.width,
+            positionAbsolute: {
+              x: id === 1 ? 0 : node.x,
+              y: id === 1 ? 0 : node.y
+            },
+            positionRelative: {
+              x: id === 1 ? 0 : node.x,
+              y: id === 1 ? 0 : node.y,
+            }
+          },
           position: node.layoutPositioning === "ABSOLUTE" ? "absolute" : "static",
           active: true,
           attribute: father >= 1200 && father <= 1600 ? PropertiesCss: {},
         },
         mobileLandscape: {
-          width: "767",
+          grid: {
+            height: node.height,
+            width: node.width,
+            positionAbsolute: {
+              x: id === 1 ? 0 : node.x,
+              y: id === 1 ? 0 : node.y
+            },
+            positionRelative: {
+              x: id === 1 ? 0 : node.x,
+              y: id === 1 ? 0 : node.y,
+            }
+          },
           position: node.layoutPositioning === "ABSOLUTE" ? "absolute" : "static", 
           active: true,
           attribute: father > 479 && father < 767 ? PropertiesCss: {},
         }
       },
-      grid: {
-        height: node.height, 
-        width: node.width,
-        positionAbsolute: {
-          x: id === 1 ? 0 : node.x,
-          y: id === 1 ? 0 : node.y
-        },
-        positionRelative: {
-          x: id === 1 ? 0 : node.x,
-          y: id === 1 ? 0 : node.y,
-        }
-      },
+      // grid: {
+      //   height: node.height, 
+      //   width: node.width,
+      //   positionAbsolute: {
+      //     x: id === 1 ? 0 : node.x,
+      //     y: id === 1 ? 0 : node.y
+      //   },
+      //   positionRelative: {
+      //     x: id === 1 ? 0 : node.x,
+      //     y: id === 1 ? 0 : node.y,
+      //   }
+      // },
       event: "",
       state: {},
       other: {}
     },
     hasChildren: hasChildren,
+    type: node.type,
+    x: node.x,
+    y: node.y,    
     children: []
   };
 
@@ -171,15 +304,15 @@ let createComponent = async (node, value) => {
     tree.tag = imageEncode?.image?.length > 3 ? "img" : componentType
     tree.tagName = tree.image?.image || imageEncode?.image?.length > 3 ?  "img" : componentType
   }
+
   if (hasChildren && !(componentType === 'svg')) {
     const childComponents = await Promise.all(
       node.children.map(async (childNode, i) => {
-        const childComponent = await createComponent(childNode, id + (i+1));
+        const childComponent = await createComponent(childNode, id + ( i + 1 ));
         return childComponent;
       })
     );
 
-    // const chunkSize = 90000000;
     const chunkSize = 4500000;
     const childChunks = [];
 
@@ -214,9 +347,10 @@ figma.ui.onmessage = async (msg) => {
       const selectedComponent = figma.currentPage.selection[0];
       const jsonTree = await createComponent(selectedComponent, 1);
       changeVisibility(jsonTree, fatherWidth())
-      updateZIndex(jsonTree, fatherWidth() )
+      updateProperties(jsonTree, fatherWidth())
       modifyPosition(jsonTree, fatherWidth())
-      // updateProperties(jsonTree, fatherWidth())
+      updateZIndex(jsonTree, fatherWidth())
+      buildRotation(jsonTree, fatherWidth())
       const jsonText = JSON.stringify(jsonTree, null, 2);
       
       figma.ui.postMessage({ type: "json-data", data: jsonText });

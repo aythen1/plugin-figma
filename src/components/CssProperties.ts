@@ -29,9 +29,17 @@ import {
   buildGradientStroke,
   buildGradientFills,
   buildRotation,
+  getLayoutSizingHorizontal,
+  getLayoutSizingVertictal
 } from './PropertiesHandlers';
 
 const specialProperties = {
+  width: (node) => ({
+    widthValue: node.layoutSizingHorizontal ? getLayoutSizingHorizontal(node) : null
+  }),
+  height: (node) => ({
+    heightValue:node.layoutSizingVertical ? getLayoutSizingVertictal(node) : null
+  }),  
   parent: () => ({
     zIndex: 0
   }),
@@ -69,11 +77,12 @@ const specialProperties = {
     gradientFill: Object.keys(node.fills).length === 0 ? null : buildGradientFills(node)
   }),
   fills: (node) => ({
-    background: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? convertFigmaGradientToString(node) : null,
+    background: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] && node.type === "TEXT" ? convertFigmaGradientToString(node) : null,
+    gradients: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] && node.type !== "TEXT" ? convertFigmaGradientToString(node) : null,
     color: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? getTextColor(node) : null,
     backgroundColor: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? getBackgroundColor(node) : null,
     "-webkitBackgroundClip": node.type === "TEXT" ? "text" : null,
-    "-webkitTextFillColor": buildWebkitText(node),
+    "-webkitTextFillColor": node.type === "TEXT" ? buildWebkitText(node) : null,
     borderImage: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? convertBorderGradient(node) : null,
   }),
   // removed: async (node) => ({
@@ -121,16 +130,16 @@ const specialProperties = {
   }),
   fontName: (node) => ({
     fontFamily: node.fontName ? node.fontName.family : null,
-    fontWeight: node.fontName ? buildFontStyle(node.fontName.style) : null,
+    fontStyle: node.fontName ? buildFontStyle(node.fontName.style) : null,
   }),
   fontSize: (node) => ({
     fontSize: node.fontSize ? node.fontSize : null
   }),
   lineHeight: (node) => ({
-    lineHeight: node.lineHeight ? buildLineheight(node.lineHeight) : null
+    lineHeight: node.lineHeight ? buildLineheight(node.lineHeight, node.fontSize) : null
   }),
   letterSpacing: (node) => ({
-    letterSpacing: node.letterSpacing ? buildLetterspacing(node.letterSpacing) : null
+    letterSpacing: node.letterSpacing ? buildLetterspacing(node.letterSpacing, node.fontSize) : null
   }),
   textAlignHorizontal: (node) => ({
     textAlign: node.textAlignHorizontal ? buildTextalign(node.textAlignHorizontal) : null
@@ -144,13 +153,17 @@ const specialProperties = {
   textCase: (node) => ({
     textTransform: node.textCase ? buildTextcase(node.textCase) : null
   }),
+  textTruncation: (node) => ({
+    textOverflow: node.textTruncation && node.textTruncation === "ENDING" ? "ellipsis" : null,
+    overflow: node.textTruncation && node.textTruncation === "ENDING" ? "hidden" : null
+  }),
   effects: (node) => ({
     boxShadow: !node.effects || Object.keys(node.effects).length == 0 ? null : node.effects[0] ? buildEffects(node) : null,
     filter: !node.effects || Object.keys(node.effects).length == 0 ? null : node.effects[0] ? buildEffects(node) : null,
     backdropFilter: !node.effects || Object.keys(node.effects).length == 0 ? null : node.effects[0] ? buildEffects(node) : null,
   }),
   rotation: (node) => ({
-    rotation: node.rotation ? buildRotation(node.rotation) : null
+    rotation: node.rotation ? node.rotation : null
   }),
   strokeMiterLimit: (node) => ({
     strokeMiterlimit: node.strokeMiterLimit ? node.strokeMiterLimit : null
@@ -166,7 +179,13 @@ const specialProperties = {
   }),
   fillGeometry: (node) => ({
     clipPath: getfillGeometry(node)
-  })
+  }),
+  // x: (node) => ({
+  //   filter: node.effects[0] ? buildEffects(node) : null,
+  // }),
+  // y: (node) => ({
+  //   backdropFilter: node.effects[0] ? buildEffects(node) : null,
+  // })  
 };
 
 export const fnNativeAttributes = (node) => {
@@ -178,7 +197,7 @@ export const fnNativeAttributes = (node) => {
     "parent",
     // "description",
     // "dashPattern"
-     "removed",
+    "removed",
     // "absoluteTransform",
     // "absoluteBoundingBox",
     // "absoluteRenderBounds",
@@ -195,14 +214,16 @@ export const fnNativeAttributes = (node) => {
     // "backgrounds"
     "clipsContent",
     "visible",
-    // "width",
-    // "height",
+    "width",
+    "height",
     "maxHeight",
     "minHeight",
     "maxWidth",
     "minWidth",
     "fontSize",
+    "fontWeight",
     "fontName",
+    "textAlignHorizontal",
     "rotation",
     "opacity",
     "paddingTop",
@@ -243,9 +264,9 @@ export const fnNativeAttributes = (node) => {
     // "arcData",
     // "itemReverseZIndex",
     "selectedTextRange",
-    "innerRadius",
-    "textAlignHorizontal",
+    // "innerRadius",
     "textCase",
+    "textTruncation",
     // "textAutoResize",
     "textAlignVertical",
     "textDecoration",
