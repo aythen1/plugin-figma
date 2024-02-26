@@ -148,7 +148,7 @@ function getUrl(node) {
   return "";
 }
 
-let createComponent = async (node, value) => {
+let createComponent = async (node, value, idx) => {
   let id = value
   const componentType = getComponentType(node);
   const hasChildren = node.type === 'GROUP' || node.type === 'FRAME' || node.type === 'INSTANCE' || node.type === 'COMPONENT' || node.type === 'COMPONENT_SET' || node.type === 'BOOLEAN_OPERATION';
@@ -156,7 +156,7 @@ let createComponent = async (node, value) => {
   const cssProperties = fnNativeAttributes(node);
   const PropertiesCss = deleteProperties(cssProperties)
   const imageEncode = await getImages(node);
-  const father = figma.currentPage.selection[0].width
+  const father = figma.currentPage.selection[idx].width
   const url = getUrl(node)
     
   let tree = {
@@ -308,7 +308,7 @@ let createComponent = async (node, value) => {
   if (hasChildren && !(componentType === 'svg')) {
     const childComponents = await Promise.all(
       node.children.map(async (childNode, i) => {
-        const childComponent = await createComponent(childNode, id + ( i + 1 ));
+        const childComponent = await createComponent(childNode, id + ( i + 1 ), idx);
         return childComponent;
       })
     );
@@ -344,18 +344,24 @@ figma.showUI(__html__, { themeColors: true, height: 300 });
 figma.ui.onmessage = async (msg) => {
   if (msg.type === "figma-json") {
     try {
-      const selectedComponent = figma.currentPage.selection[0];
-      const jsonTree = await createComponent(selectedComponent, 1);
-      changeVisibility(jsonTree, fatherWidth())
-      updateProperties(jsonTree, fatherWidth())
-      modifyPosition(jsonTree, fatherWidth())
-      updateZIndex(jsonTree, fatherWidth())
-      buildRotation(jsonTree, fatherWidth())
-      const jsonText = JSON.stringify(jsonTree, null, 2);
-      
+      const selectedComponent = figma.currentPage.selection;
+      const views = await Promise.all(selectedComponent.map( async(el, i) => {
+        const jsonTree = await createComponent(el, 1, i);
+        changeVisibility(jsonTree, fatherWidth())
+        updateProperties(jsonTree, fatherWidth())
+        modifyPosition(jsonTree, fatherWidth())
+        updateZIndex(jsonTree, fatherWidth())
+        buildRotation(jsonTree, fatherWidth())
+        return jsonTree
+      }))
+      const combinedJson = {
+        views: views
+      }
+      const jsonText = JSON.stringify(combinedJson, null, 2);
       figma.ui.postMessage({ type: "json-data", data: jsonText });
     } catch (error) {
       console.error('Error al generar el JSON:', error);
     }
+      
   }
 }
