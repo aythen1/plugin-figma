@@ -180,6 +180,9 @@ const specialProperties = {
   fillGeometry: (node) => ({
     clipPath: getfillGeometry(node)
   }),
+  isMask: (node) => ({
+    isMask: node.isMask === true ? true : null 
+  })
   // x: (node) => ({
   //   filter: node.effects[0] ? buildEffects(node) : null,
   // }),
@@ -245,6 +248,7 @@ export const fnNativeAttributes = (node) => {
     // "layoutSizingHorizontal",
     // "layoutSizingVertical",
     // "isAsset",
+    "isMask",
     "maskType",
     "effects",
     "fills",
