@@ -16,6 +16,8 @@ export const updateZIndex = (node, screen, zIndex = 0) => {
     node.Property.style[screen].grid.positionRelative.x = 0;
     node.Property.style[screen].grid.positionRelative.y = 0;
     
+    node.Property.style.wide.grid.positionAbsolute.x = 0;
+    node.Property.style.wide.grid.positionAbsolute.y = 0;
     node.x = 0;
     node.y = 0;
     }  
@@ -94,9 +96,16 @@ export const modifyPosition = (node, screen) => {
             child.Property.style[screen].position = 'static';
           } else {
             child.Property.style[screen].position = 'absolute';
+            child.Property.style.wide.position = 'absolute';
             if (node.type === "GROUP" ) {              
               grid.positionAbsolute.x -= node.x;
               grid.positionAbsolute.y -= node.y;
+              if (child.Property.style[screen].attribute.isMask &&
+                child.Property.style[screen].attribute.isMask === true) {
+                node.Property.style[screen].attribute.clipPath = child.Property.style[screen].attribute.clipPath
+                node.Property.style[screen].attribute.rotation = node.Property.style[screen].attribute.rotation ?? child.Property.style[screen].attribute.rotation ?? 0
+                child.Property.style[screen].attribute.visibility = "hidden"
+              }
             }
             grid.x -= parentGrid.positionRelative.x;
             grid.y -= parentGrid.positionRelative.y;
@@ -726,7 +735,6 @@ export const buildGradientFills = (node) => {
 }
 
 
-
 /**
  * STYLES TEXT
  * @param style
@@ -947,6 +955,9 @@ export const getMaskType  = (node) => {
 export const getfillGeometry = (node) => {
   // node.type === "LINE" --> strokeGeometry
   // node.type === "VECTOR" --> vectorPaths
+  if (node.isMask && node.isMask === true) {
+    return `path("${node.fillGeometry[0].data}")`
+  }
   if (node.type === "ELLIPSE" || node.type === "POLYGON" || node.type === "STAR" && node.fillGeometry.length > 0) return node.fillGeometry[0].data
   if (node.type === "VECTOR" && node.vectorPaths.length > 0) return node.vectorPaths[0].data
   if (node.type === "LINE" && node.strokeGeometry[0].length > 0) return node.strokeGeometry[0].data; 

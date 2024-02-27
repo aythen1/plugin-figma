@@ -189,7 +189,7 @@ let createComponent = async (node, value, idx) => {
           },
           position: node.layoutPositioning === "ABSOLUTE" ? "absolute" : "static",
           active: true,
-          attribute: father > 1600 ? PropertiesCss: {},
+          attribute: PropertiesCss
         },
         laptop: {
           grid: {
@@ -277,18 +277,6 @@ let createComponent = async (node, value, idx) => {
           attribute: father > 479 && father < 767 ? PropertiesCss: {},
         }
       },
-      // grid: {
-      //   height: node.height, 
-      //   width: node.width,
-      //   positionAbsolute: {
-      //     x: id === 1 ? 0 : node.x,
-      //     y: id === 1 ? 0 : node.y
-      //   },
-      //   positionRelative: {
-      //     x: id === 1 ? 0 : node.x,
-      //     y: id === 1 ? 0 : node.y,
-      //   }
-      // },
       event: "",
       state: {},
       other: {}
