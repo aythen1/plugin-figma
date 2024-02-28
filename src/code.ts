@@ -317,8 +317,8 @@ let createComponent = async (node, value, idx) => {
   return tree;
 };
 
-const fatherWidth = () => {
-  const father = figma.currentPage.selection[0].width
+const fatherWidth = (i) => {
+  const father = figma.currentPage.selection[i].width
     if (father < 479) return 'mobile'
     else if (father >= 479 && father < 767) return 'mobileLandscape'
     else if (father >= 767 && father < 991) return 'tablet'
@@ -333,13 +333,14 @@ figma.ui.onmessage = async (msg) => {
   if (msg.type === "figma-json") {
     try {
       const selectedComponent = figma.currentPage.selection;
-      const views = await Promise.all(selectedComponent.map( async(el, i) => {
+      const views = await Promise.all(selectedComponent.map(async (el, i) => {
+        
         const jsonTree = await createComponent(el, 1, i);
-        changeVisibility(jsonTree, fatherWidth())
-        updateProperties(jsonTree, fatherWidth())
-        modifyPosition(jsonTree, fatherWidth())
-        updateZIndex(jsonTree, fatherWidth())
-        buildRotation(jsonTree, fatherWidth())
+        changeVisibility(jsonTree, fatherWidth(i))
+        updateProperties(jsonTree, fatherWidth(i))
+        modifyPosition(jsonTree, fatherWidth(i))
+        updateZIndex(jsonTree, fatherWidth(i))
+        buildRotation(jsonTree, fatherWidth(i))
         return jsonTree
       }))
       const combinedJson = {

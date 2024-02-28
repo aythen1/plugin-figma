@@ -791,7 +791,20 @@ export const buildTextcase = (textCase) => {
   if (textCase === 'LOWER') return 'lowercase'
   if (textCase === 'TITLE') return 'capitalize'
 }
-
+/*
+effects: 
+[
+blendMode: "NORMAL"
+boundVariables: {}
+color: {r: 0, g: 0, b: 0, a: 0.5}
+offset: {x: 0, y: 10}
+radius: 20
+showShadowBehindNode: false
+spread: 0
+type: "DROP_SHADOW"
+visible: true
+] 
+*/
 /**
    * EFFECTS: 
    * Shadows
@@ -805,15 +818,16 @@ export const buildEffects = (node) => {
   if (node.effects[0].visible === false) return null
   const effects = node.effects[0]
   // const hexaColor = makeHex(effects.color.r, effects.color.g, effects.color.b)
-  if(!node.effects[0] || Object.keys(node.effects[0]).length === 0 || !effects.type) return null
-  if (effects.type === 'DROP_SHADOW') {
-    // return `${offset.x}px ${offset.y}px ${radius}px ${spread}px rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})`
-    return [{
-      ejeX: effects.offset.x,
-      ejeY: effects.offset.y,
-      blur: effects.radius,
-      opacity: effects.color.a * 100,
-      color: effects.hexaColor,
+  if (!node.effects[0] || Object.keys(node.effects[0]).length === 0 || !effects.type) return null
+      
+    if (effects.type === 'DROP_SHADOW') {
+      // return `${offset.x}px ${offset.y}px ${radius}px ${spread}px rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})`
+      return [{
+        ejeX: effects.offset.x,
+        ejeY: effects.offset.y,
+        blur: effects.radius,
+        opacity: effects.color.a * 100,
+        color: effects.hexaColor,
       inset: false
     }]
   }
