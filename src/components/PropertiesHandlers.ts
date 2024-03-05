@@ -8,19 +8,17 @@ export const deleteProperties = (props) => {
 }
 
 export const updateZIndex = (node, screen, zIndex = 0) => {
-  // actualizar el padre a x = 0, y = 0
+  // actualizar el padre a x = 0, y = 0 
   if (node.figmaId === 1) {
     node.Property.style[screen].position = "relative"
     node.Property.style[screen].grid.positionAbsolute.x = 0;
     node.Property.style[screen].grid.positionAbsolute.y = 0;
     node.Property.style[screen].grid.positionRelative.x = 0;
-    node.Property.style[screen].grid.positionRelative.y = 0;
-    
+    node.Property.style[screen].grid.positionRelative.y = 0;    
     node.Property.style.wide.grid.positionAbsolute.x = 0;
     node.Property.style.wide.grid.positionAbsolute.y = 0;
-    node.x = 0;
-    node.y = 0;
-    }  
+  }
+    
   
   // Actualiza el zIndex del objeto actual
   node.Property.style[screen].attribute.zIndex = zIndex;
@@ -317,7 +315,19 @@ export const getBackgroundColor = (node) => {
   }
   return "transparent";
 }
-  
+
+export const buildFilterImage = (node) => { 
+  if ( node.fills[0].visible === true) {
+    const data = node.fills[0].filters
+    function rotate(dato) {
+      dato.tint ?? 0 
+      dato.tint !== 0 ? dato.tint * 100 : null
+    }
+    return `brightness(${data.exposure + 1}) contrast(${data.contrast + 1}) saturate(${data.saturation + 1}) sepia(${data.temperature + 1})`    
+  }
+  return null;
+}
+
 export const getTextColor = (node) => {
   if (node.type === 'TEXT' || node.type === "VECTOR" || node.type === "STAR" || node.type === "ELLIPSE" || node.type === "POLYGON" || node.type === "LINE" && node.fills.length > 0) {
     const textFill = node.fills[0];

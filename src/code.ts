@@ -148,11 +148,11 @@ function getUrl(node) {
   return "";
 }
 
-let createComponent = async (node, value, idx) => {
-  let id = value
+let id = 1
+let createComponent = async (node, idx) => {
   const componentType = getComponentType(node);
   const hasChildren = node.type === 'GROUP' || node.type === 'FRAME' || node.type === 'INSTANCE' || node.type === 'COMPONENT' || node.type === 'COMPONENT_SET' || node.type === 'BOOLEAN_OPERATION';
-  const componentName = (node.name).substring(0, 24);
+  const componentName = (node.name).substring(0, 36);
   const cssProperties = fnNativeAttributes(node);
   const PropertiesCss = deleteProperties(cssProperties)
   const imageEncode = await getImages(node);
@@ -296,12 +296,12 @@ let createComponent = async (node, value, idx) => {
   if (hasChildren && !(componentType === 'svg')) {
     const childComponents = await Promise.all(
       node.children.map(async (childNode, i) => {
-        const childComponent = await createComponent(childNode, id + ( i + 1 ), idx);
+        const childComponent = await createComponent(childNode, idx);
         return childComponent;
       })
     );
 
-    const chunkSize = 4500000;
+    const chunkSize = 6000000;
     const childChunks = [];
 
     for (let i = 0; i < childComponents.length; i += chunkSize) {
@@ -335,7 +335,7 @@ figma.ui.onmessage = async (msg) => {
       const selectedComponent = figma.currentPage.selection;
       const views = await Promise.all(selectedComponent.map(async (el, i) => {
         
-        const jsonTree = await createComponent(el, 1, i);
+        const jsonTree = await createComponent(el, i);
         changeVisibility(jsonTree, fatherWidth(i))
         updateProperties(jsonTree, fatherWidth(i))
         modifyPosition(jsonTree, fatherWidth(i))

@@ -30,7 +30,8 @@ import {
   buildGradientFills,
   buildRotation,
   getLayoutSizingHorizontal,
-  getLayoutSizingVertictal
+  getLayoutSizingVertictal,
+  buildFilterImage
 } from './PropertiesHandlers';
 
 const specialProperties = {
@@ -47,7 +48,7 @@ const specialProperties = {
     visibility: node.visible ? "visible" : "hidden"
   }),
   clipsContent: (node) => ({
-    overflow: node.clipsContent === true ? "hidden" : null
+    overflow: node.clipsContent && node.clipsContent === true ? "hidden" : null
   }),
   opacity: (node) => ({
     opacity: node.opacity ? node.opacity * 100 : null
@@ -56,19 +57,19 @@ const specialProperties = {
     display: getDisplay(node)
   }),
   layoutMode: (node) => ({
-    flexDirection: node.inferredAutoLayout.layoutMode ? getLayoutMode(node) : null
+    flexDirection: node.inferredAutoLayout && node.inferredAutoLayout.layoutMode ? getLayoutMode(node) : null
   }),
   primaryAxisAlignItems: (node) => ({
-    justifyContent: node.inferredAutoLayout.primaryAxisAlignItems ? getPrimaryAxisAlignItems(node) : null
+    justifyContent: node.inferredAutoLayout && node.inferredAutoLayout.primaryAxisAlignItems ? getPrimaryAxisAlignItems(node) : null
   }),
   counterAxisAlignItems: (node) => ({
-    alignItems: node.inferredAutoLayout.counterAxisAlignItems ? getCounterAxisAlignItems(node) : null
+    alignItems: node.inferredAutoLayout && node.inferredAutoLayout.counterAxisAlignItems ? getCounterAxisAlignItems(node) : null
   }),
   layoutWrap: (node) => ({
-    flexWrap: node.flexWrap ? node.flexWrap.toLowerCase() : null
+    flexWrap: node.layoutWrap ? node.layoutWrap.toLowerCase() : null
   }),
   layoutGrow: (node) => ({
-    flexGrow: node.layoutGrow? node.layoutGrow : null
+    flexGrow: node.layoutGrow ? node.layoutGrow : null
   }),
   itemSpacing: (node) => ({
     gap: node.itemSpacing || node.inferredAutoLayout.itemSpacing  ? node.inferredAutoLayout.itemSpacing : null
@@ -84,6 +85,7 @@ const specialProperties = {
     "-webkitBackgroundClip": node.type === "TEXT" ? "text" : null,
     "-webkitTextFillColor": node.type === "TEXT" ? buildWebkitText(node) : null,
     borderImage: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? convertBorderGradient(node) : null,
+    filter: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0].type === "IMAGE" ? buildFilterImage(node) : null
   }),
   // removed: async (node) => ({
   //   backgroundImage: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? await getImages(node) : null,
@@ -182,6 +184,9 @@ const specialProperties = {
   }),
   isMask: (node) => ({
     isMask: node.isMask === true ? true : null 
+  }),
+  isAsset: (node) => ({
+    objectFit: node.isAsset === true ? "cover" : null 
   })
   // x: (node) => ({
   //   filter: node.effects[0] ? buildEffects(node) : null,
@@ -247,7 +252,7 @@ export const fnNativeAttributes = (node) => {
     // "layoutPositioning",
     // "layoutSizingHorizontal",
     // "layoutSizingVertical",
-    // "isAsset",
+    "isAsset",
     "isMask",
     "maskType",
     "effects",
