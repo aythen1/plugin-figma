@@ -315,15 +315,15 @@ export const getBackgroundColor = (node) => {
   }
   return "transparent";
 }
-
+ 
 export const buildFilterImage = (node) => { 
   if ( node.fills[0].visible === true) {
     const data = node.fills[0].filters
     function rotate(dato) {
-      dato.tint ?? 0 
-      dato.tint !== 0 ? dato.tint * 100 : null
+       if(dato.tint === 0) return 0 
+       if(dato.tint !== 0) return dato.tint * 100
     }
-    return `brightness(${data.exposure + 1}) contrast(${data.contrast + 1}) saturate(${data.saturation + 1}) sepia(${data.temperature + 1})`    
+    return `brightness(${data.exposure + 1}) contrast(${data.contrast + 1}) saturate(${data.saturation + 1}) sepia(${data.temperature <= 0 ? 0 : data.temperature + 1}) hue-rotate(${rotate(data)}deg)`  
   }
   return null;
 }
@@ -388,6 +388,7 @@ const makeHex = (r, g, b) => {
   let blue = rgbToHex(b);
   return '#' + red + green + blue;
 }
+
 const rgbaToHex = (r, g, b, a) => {
   let red = rgbToHex(r);
   let green = rgbToHex(g);

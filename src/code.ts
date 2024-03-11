@@ -148,8 +148,8 @@ function getUrl(node) {
   return "";
 }
 
-let id = 1
-let createComponent = async (node, idx) => {
+
+let createComponent = async (node, idx, id) => {
   const componentType = getComponentType(node);
   const hasChildren = node.type === 'GROUP' || node.type === 'FRAME' || node.type === 'INSTANCE' || node.type === 'COMPONENT' || node.type === 'COMPONENT_SET' || node.type === 'BOOLEAN_OPERATION';
   const componentName = (node.name).substring(0, 36);
@@ -296,12 +296,13 @@ let createComponent = async (node, idx) => {
   if (hasChildren && !(componentType === 'svg')) {
     const childComponents = await Promise.all(
       node.children.map(async (childNode, i) => {
-        const childComponent = await createComponent(childNode, idx);
+        let childId = id + i
+        const childComponent = await createComponent(childNode, idx, childId);
         return childComponent;
       })
     );
 
-    const chunkSize = 6000000;
+    const chunkSize = 12000000;
     const childChunks = [];
 
     for (let i = 0; i < childComponents.length; i += chunkSize) {
@@ -334,8 +335,8 @@ figma.ui.onmessage = async (msg) => {
     try {
       const selectedComponent = figma.currentPage.selection;
       const views = await Promise.all(selectedComponent.map(async (el, i) => {
-        
-        const jsonTree = await createComponent(el, i);
+         let id = 1        
+        const jsonTree = await createComponent(el, i, id);
         changeVisibility(jsonTree, fatherWidth(i))
         updateProperties(jsonTree, fatherWidth(i))
         modifyPosition(jsonTree, fatherWidth(i))
@@ -350,7 +351,6 @@ figma.ui.onmessage = async (msg) => {
       figma.ui.postMessage({ type: "json-data", data: jsonText });
     } catch (error) {
       console.error('Error al generar el JSON:', error);
-    }
-      
+    }      
   }
 }
