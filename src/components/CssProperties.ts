@@ -85,7 +85,12 @@ const specialProperties = {
     "-webkitBackgroundClip": node.type === "TEXT" ? "text" : null,
     "-webkitTextFillColor": node.type === "TEXT" ? buildWebkitText(node) : null,
     borderImage: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? convertBorderGradient(node) : null,
-    filter: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0].type === "IMAGE" ? buildFilterImage(node) : null
+    filters: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0].type === "IMAGE" ? buildFilterImage(node) : null
+  }),
+  effects: (node) => ({
+    boxShadow: !node.effects || Object.keys(node.effects).length == 0 ? null : node.effects[0] ? buildEffects(node) : null,
+    filters: !node.effects || Object.keys(node.effects).length == 0 ? null : node.effects[0] ? buildEffects(node) : null,
+    backdropFilter: !node.effects || Object.keys(node.effects).length == 0 ? null : node.effects[0] ? buildEffects(node) : null,
   }),
   // removed: async (node) => ({
   //   backgroundImage: !node.fills || Object.keys(node.fills).length == 0 ? null : node.fills[0] ? await getImages(node) : null,
@@ -159,11 +164,6 @@ const specialProperties = {
     textOverflow: node.textTruncation && node.textTruncation === "ENDING" ? "ellipsis" : null,
     overflow: node.textTruncation && node.textTruncation === "ENDING" ? "hidden" : null
   }),
-  effects: (node) => ({
-    boxShadow: !node.effects || Object.keys(node.effects).length == 0 ? null : node.effects[0] ? buildEffects(node) : null,
-    filter: !node.effects || Object.keys(node.effects).length == 0 ? null : node.effects[0] ? buildEffects(node) : null,
-    backdropFilter: !node.effects || Object.keys(node.effects).length == 0 ? null : node.effects[0] ? buildEffects(node) : null,
-  }),
   rotation: (node) => ({
     rotation: node.rotation ? node.rotation : null
   }),
@@ -186,7 +186,7 @@ const specialProperties = {
     isMask: node.isMask === true ? true : null 
   }),
   isAsset: (node) => ({
-    objectFit: node.isAsset === true ? "cover" : null 
+    objectFit: node.type === "RECTANGLE" || node.type === 'IMAGE' && node.isAsset === true ? "cover" : null 
   })
   // x: (node) => ({
   //   filter: node.effects[0] ? buildEffects(node) : null,

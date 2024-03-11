@@ -323,7 +323,15 @@ export const buildFilterImage = (node) => {
        if(dato.tint === 0) return 0 
        if(dato.tint !== 0) return dato.tint * 100
     }
-    return `brightness(${data.exposure + 1}) contrast(${data.contrast + 1}) saturate(${data.saturation + 1}) sepia(${data.temperature <= 0 ? 0 : data.temperature + 1}) hue-rotate(${rotate(data)}deg)`  
+    // return `brightness(${data.exposure + 1}) contrast(${data.contrast + 1}) saturate(${data.saturation + 1}) sepia(${data.temperature <= 0 ? 0 : data.temperature + 1}) hue-rotate(${rotate(data)}deg)`
+    return {
+        brightness: data.exposure || 1,
+        contrast: data?.contrast || 1,
+        opacity: node.fills[0].opacity * 100 || 100,
+        saturate: data?.saturation || 1,
+        sepia: data?.temperature || 0,
+        tint: rotate(data) || 0,
+      }
   }
   return null;
 }
@@ -839,17 +847,30 @@ export const buildEffects = (node) => {
         blur: effects.radius,
         opacity: effects.color.a * 100,
         color: effects.hexaColor,
-      inset: false
+        inset: false
     }]
   }
   if (effects.type === 'INNER_SHADOW') {
-    return `${effects.offset.x}px ${effects.offset.y}px ${effects.radius}px ${effects.spread}px rgba(${effects.color.r}, ${effects.color.g}, ${effects.color.b}, ${effects.color.a}) inset`    
+    // return `${effects.offset.x}px ${effects.offset.y}px ${effects.radius}px ${effects.spread}px rgba(${effects.color.r}, ${effects.color.g}, ${effects.color.b}, ${effects.color.a}) inset` 
+    return [{
+        ejeX: effects.offset.x,
+        ejeY: effects.offset.y,
+        blur: effects.radius,
+        opacity: effects.color.a * 100,
+        color: effects.hexaColor,
+        inset: true
+    }]
   }
   if (effects.type === 'LAYER_BLUR') {
-    return `blur(${effects.radius/2}px)`
+    // return `blur(${effects.radius / 2}px)`
+    return {
+        blur: effects.radius / 2
+      }
+    
   }
   if (effects.type === 'BACKGROUND_BLUR') {
-    return `blur(${effects.radius/2}px)`
+    // return `blur(${effects.radius/2}px)`
+    return effects.radius / 2
   }
 }
 
