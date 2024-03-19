@@ -6,6 +6,7 @@
   "ui": "dist/ui.html",
   "editorType": ["figma", "figjam"],
   "networkAccess": {
-    "allowedDomains": ["none"]
+    "allowedDomains": ["*"],
+    "reasoning": "Este plugin necesita acceder a varios dominios para funcionar correctamente."
   }
 }

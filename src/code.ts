@@ -302,7 +302,7 @@ let createComponent = async (node, idx, id) => {
       })
     );
 
-    const chunkSize = 12000000;
+    const chunkSize = 9000000;
     const childChunks = [];
 
     for (let i = 0; i < childComponents.length; i += chunkSize) {

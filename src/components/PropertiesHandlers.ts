@@ -1,3 +1,4 @@
+
 export const deleteProperties = (props) => {
     for (var key in props) {
         if (props[key] === null) {
@@ -353,25 +354,75 @@ export const getTextColor = (node) => {
   return "transparent";
 }
 
+// export async function getImages(node) {
+//   if (node.fills && node.fills.length > 0) {
+//     const image = await Promise.all( node.fills.map(async (fill) => {
+//         if (fill.visible === false) return null
+//         if (fill.type === "IMAGE") {
+//           const imageConvert = figma.getImageByHash(fill.imageHash);
+//           const imageEncode = await imageConvert.getBytesAsync();
+//           const imgArray = Object.values(imageEncode);
+//           return {
+//             image: imgArray,
+//             src: ""
+//           };
+//         }
+//         return null;
+//       }))
+//     const resp = image.filter(img => img !== null)
+ 
+//     return resp[0]
+//   }
+//   return null;
+// }
+
 export async function getImages(node) {
   if (node.fills && node.fills.length > 0) {
-    const image = await Promise.all( node.fills.map(async (fill) => {
-        if (fill.visible === false) return null
-        if (fill.type === "IMAGE") {
-          const imageConvert = figma.getImageByHash(fill.imageHash);
-          const imageEncode = await imageConvert.getBytesAsync();
-          const imgArray = Object.values(imageEncode);
+    const image = await Promise.all(node.fills.map(async (fill) => {
+      if (fill.visible === false) return null
+      if (fill.type === "IMAGE") {
+        const imageConvert = figma.getImageByHash(fill.imageHash);
+        const imageEncode = await imageConvert.getBytesAsync();
+        const imgArray = Object.values(imageEncode);
+        const name = node.name;
+
+        // Construir el cuerpo de la solicitud manualmente
+        const boundary = '----WebKitFormBoundary' + Math.random().toString(36).substring(2);
+        let formData = '';
+
+        formData += '--' + boundary + '\r\n';
+        formData += 'Content-Disposition: form-data; name="imageFile";  filename="image.png"\r\n';
+        formData += 'Content-Type: image/png\r\n\r\n';
+
+        formData += imgArray.toString();        
+        formData += '\r\n';
+        formData += '--' + boundary + '--\r\n';
+
+        try {
+          const resp = await fetch(`https://api-web3.aythen.com/api/v1/project/addImageFigma?name=${name}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'multipart/form-data; boundary=' + boundary
+            },
+            body: formData
+          });
+
+          const data = await resp.json();
           return {
-            image: imgArray,
-            src: ""
+            image: "",
+            src: data // Podrías ajustar esto según la respuesta de tu backend
           };
+        } catch (error) {
+          console.error('Error al enviar la imagen al backend:', error);
+          return null;
         }
-        return null;
-      }))
-    const resp = image.filter(img => img !== null)
- 
-    return resp[0]
-  } 
+      }
+      return null;
+    }));
+
+    const resp = image.filter(img => img !== null);
+    return resp[0];
+  }
   return null;
 }
 
